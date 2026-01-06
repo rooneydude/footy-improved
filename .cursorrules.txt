@@ -2,7 +2,7 @@
 
 ## 🤖 ACTIVE AGENTS (Always Running in Background)
 
-You are operating with SEVEN agents always active. See [AGENTS.md](./AGENTS.md) for full agent definitions.
+You are operating with EIGHT agents always active. See [AGENTS.md](./AGENTS.md) for full agent definitions.
 
 ### Agent 1: Library Research Agent (ALWAYS ACTIVE)
 **BEHAVIOR:** Before ANY code implementation:
@@ -66,13 +66,30 @@ You are operating with SEVEN agents always active. See [AGENTS.md](./AGENTS.md) 
 ### Agent 7: Auto-Debugging Escalation Agent (ALWAYS ACTIVE)
 **BEHAVIOR:** On EVERY debugging/fix attempt:
 - AUTOMATICALLY track fix attempts (count failures)
-- After 2 unsuccessful fix attempts: AUTOMATICALLY search web and GitHub for top 2 solutions, test both
-- If top 2 solutions fail: AUTOMATICALLY search for 4 more solutions from web/GitHub/forums/chatboards, implement and test all 4 one by one
-- If all 6 solutions fail: AUTOMATICALLY propose creative new solutions that haven't been tried
+- After 2 unsuccessful fix attempts: AUTOMATICALLY check FIRST if problem is caused by Cursor browser limitations
+- If Cursor browser issue found: AUTOMATICALLY RECOMMEND testing in regular browser, incognito mode, or disabling Cursor extension
+- If NOT a Cursor browser issue: AUTOMATICALLY search Stack Overflow FIRST for solutions
+- If Stack Overflow has solutions: AUTOMATICALLY try ALL applicable Stack Overflow solutions (not just 2)
+- If Stack Overflow has no solutions: AUTOMATICALLY search GitHub for top 2 solutions, test both
+- If all Stack Overflow/GitHub solutions fail: AUTOMATICALLY search for 4 more solutions from web/GitHub/forums/chatboards, implement and test all 4 one by one
+- If all solutions fail: AUTOMATICALLY propose creative new solutions that haven't been tried
 - AUTOMATICALLY test each solution before moving to next
-- AUTOMATICALLY document all attempts and sources
+- AUTOMATICALLY document all attempts and sources with URLs
 - AUTOMATICALLY stop as soon as problem is fixed
 - NEVER give up - escalate through all phases systematically
+
+### Agent 8: Error Memory Agent (ALWAYS ACTIVE)
+**BEHAVIOR:** On EVERY error occurrence:
+- AUTOMATICALLY detect when an error occurs (monitor error messages, stack traces, failed operations)
+- AUTOMATICALLY check ERROR-MEMORY.md FIRST when an error occurs
+- AUTOMATICALLY search for similar errors in the error memory (pattern matching, not just exact matches)
+- If error found in memory: AUTOMATICALLY retrieve and apply the known resolution immediately
+- If error NOT found in memory: AUTOMATICALLY proceed with normal debugging, then record the error after resolution
+- AUTOMATICALLY record new errors to ERROR-MEMORY.md with: error description, context, resolution, prevention tips
+- AUTOMATICALLY update occurrence count when errors repeat
+- AUTOMATICALLY learn from patterns: group similar errors together, identify common root causes
+- AUTOMATICALLY suggest preventive measures based on error patterns
+- AUTOMATICALLY cross-reference related errors
 
 ---
 

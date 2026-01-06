@@ -22,7 +22,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 🤖 ACTIVE AGENTS (Always Running in Background)
 
-**SEVEN agents are ALWAYS ACTIVE and working automatically. See [AGENTS.md](./AGENTS.md) for full definitions.**
+**EIGHT agents are ALWAYS ACTIVE and working automatically. See [AGENTS.md](./AGENTS.md) for full definitions.**
 
 ### Agent 1: Library Research Agent (AUTOMATIC)
 **You MUST AUTOMATICALLY:**
@@ -98,6 +98,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Document all attempts and sources with URLs
 - Stop as soon as problem is fixed
 - NEVER give up - escalate through all phases systematically
+
+### Agent 8: Error Memory Agent (AUTOMATIC)
+**You MUST AUTOMATICALLY on EVERY error occurrence:**
+- AUTOMATICALLY detect when an error occurs (monitor error messages, stack traces, failed operations)
+- AUTOMATICALLY check ERROR-MEMORY.md FIRST when an error occurs
+- AUTOMATICALLY search for similar errors in the error memory (pattern matching, not just exact matches)
+- If error found in memory: AUTOMATICALLY retrieve and apply the known resolution immediately
+- If error NOT found in memory: AUTOMATICALLY proceed with normal debugging, then record the error after resolution
+- AUTOMATICALLY record new errors to ERROR-MEMORY.md with: error description, context, resolution, prevention tips
+- AUTOMATICALLY update occurrence count when errors repeat
+- AUTOMATICALLY learn from patterns: group similar errors together, identify common root causes
+- AUTOMATICALLY suggest preventive measures based on error patterns
+- AUTOMATICALLY cross-reference related errors
 
 ---
 
@@ -179,7 +192,7 @@ Types: feat, fix, docs, refactor, test, chore
 
 ## Development Agents
 
-**Three specialized agents are available to assist with development:**
+**Eight specialized agents are available to assist with development:**
 
 **Quick Start:** See [AGENTS-QUICK-START.md](./AGENTS-QUICK-START.md)  
 **Full Documentation:** See [AGENTS.md](./AGENTS.md)
@@ -187,6 +200,11 @@ Types: feat, fix, docs, refactor, test, chore
 1. **Library Research Agent** - Finds and evaluates GitHub repositories before coding (enforces GitHub-first rule)
 2. **Learning & Onboarding Agent** - Helps new developers understand the codebase and learn patterns  
 3. **Code Quality & Review Agent** - Reviews code for quality, security, and best practices
+4. **API Endpoint Monitor Agent** - Monitors API endpoints, detects errors, and validates responses
+5. **Debugging Agent** - Helps debug errors, analyzes issues, and suggests fixes
+6. **Code Validation Agent** - Validates code changes, runs tests, reports errors with detailed fix instructions
+7. **Auto-Debugging Escalation Agent** - Escalates debugging when fixes fail, searches external sources systematically
+8. **Error Memory Agent** - Tracks recurring errors, records resolutions, and prevents repeating mistakes
 
 **Usage:** Copy agent prompts from AGENTS.md and use with AI assistants (Claude, ChatGPT, etc.)
 

@@ -1,6 +1,6 @@
 # Agents Quick Start Guide
 
-> **Quick reference for using the seven development agents**  
+> **Quick reference for using the eight development agents**  
 > **Full documentation:** See [AGENTS.md](./AGENTS.md)
 
 ---
@@ -41,6 +41,11 @@
 **When to use:** Automatic - activates after 2 failed fix attempts  
 **Prompt:** Automatic escalation (no manual prompt needed)  
 **Output:** Systematic search for solutions, multiple fix attempts, creative problem solving
+
+### Agent 8: Error Memory Agent
+**When to use:** Automatic - activates when errors occur  
+**Prompt:** Automatic error tracking (no manual prompt needed)  
+**Output:** Error pattern detection, resolution from memory, prevention tips
 
 ---
 
@@ -87,12 +92,14 @@
 
 ### Workflow 5: Debugging
 ```
-1. Debugging Agent → Analyzes error
-2. Debugging Agent → Traces through code
-3. Auto-Debugging Escalation Agent → Searches solutions (if fixes fail)
-4. API Endpoint Monitor Agent → Checks related endpoints
-5. Code Quality Agent → Reviews fix
-6. Code Validation Agent → Validates fix
+1. Error Memory Agent → Checks if error occurred before
+2. Debugging Agent → Analyzes error
+3. Debugging Agent → Traces through code
+4. Auto-Debugging Escalation Agent → Searches solutions (if fixes fail)
+5. API Endpoint Monitor Agent → Checks related endpoints
+6. Code Quality Agent → Reviews fix
+7. Code Validation Agent → Validates fix
+8. Error Memory Agent → Records resolution for future reference
 ```
 
 ---
@@ -133,6 +140,11 @@
 - Automatically activates after 2 failed fix attempts
 - Searches web/GitHub for solutions
 - Tests multiple approaches systematically
+
+**Error Memory:**
+- Automatically tracks recurring errors
+- Records resolutions in ERROR-MEMORY.md
+- Prevents repeating the same mistakes
 
 ---
 

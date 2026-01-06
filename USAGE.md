@@ -45,6 +45,7 @@ To verify agents are active:
 6. It should help debug errors (Debugging Agent)
 7. It should validate code changes (Code Validation Agent)
 8. It should escalate debugging when fixes fail (Auto-Debugging Escalation Agent)
+9. It should track and learn from errors (Error Memory Agent)
 
 ## Claude Code Setup
 
@@ -57,7 +58,7 @@ To verify agents are active:
 
 2. **Start Claude Code** - It will read `CLAUDE.md` automatically
 
-3. **Agents are now active** - All seven agents run in the background
+3. **Agents are now active** - All eight agents run in the background
 
 ### Customization
 
@@ -170,6 +171,7 @@ Agents can work together. For example:
 2. Learning Agent explains how to use it
 3. Code Quality Agent reviews implementation
 4. Code Validation Agent tests the code
+5. Error Memory Agent records any errors encountered
 ```
 
 ### Agent Workflows

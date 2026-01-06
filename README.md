@@ -1,12 +1,12 @@
 # Cursor & Claude Code Background Agents
 
-> **Seven specialized AI agents that run automatically in the background** to assist with code development, quality assurance, debugging, and learning.
+> **Eight specialized AI agents that run automatically in the background** to assist with code development, quality assurance, debugging, and learning.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 🎯 Overview
 
-This repository contains **seven AI development agents** designed to work automatically with Cursor IDE and Claude Code. These agents provide continuous background support for:
+This repository contains **eight AI development agents** designed to work automatically with Cursor IDE and Claude Code. These agents provide continuous background support for:
 
 - 📚 **Library Research** - Finding and evaluating existing solutions
 - 🎓 **Learning & Onboarding** - Beginner-friendly explanations and guides
@@ -15,6 +15,7 @@ This repository contains **seven AI development agents** designed to work automa
 - 🐛 **Debugging** - Systematic error analysis and fixes
 - ✓ **Code Validation** - Automatic testing and validation
 - 🔄 **Auto-Debugging Escalation** - Escalated problem-solving when fixes fail
+- 🧠 **Error Memory** - Tracks recurring errors and learns from past mistakes
 
 ## 🚀 Quick Start
 
@@ -45,7 +46,7 @@ Copy agent prompts from `AGENTS.md` and paste into:
 - ChatGPT
 - Any AI assistant that accepts system prompts
 
-## 🤖 The Seven Agents
+## 🤖 The Eight Agents
 
 ### 1. Library Research Agent
 **Purpose:** Searches GitHub repositories and evaluates existing solutions before writing custom code.
@@ -128,6 +129,19 @@ Copy agent prompts from `AGENTS.md` and paste into:
 - Tests multiple solutions systematically
 - Creative problem solving when all else fails
 - Never gives up approach
+
+### 8. Error Memory Agent
+**Purpose:** Tracks errors that occur more than once, records how they were resolved, and helps the AI learn from past mistakes.
+
+**When to use:** Automatic - activates when errors occur
+
+**Key Features:**
+- Automatic error detection and pattern matching
+- Persistent memory in ERROR-MEMORY.md
+- Retrieves known solutions from memory
+- Records new error resolutions
+- Prevents repeating the same mistakes
+- Pattern recognition across similar errors
 
 ## 📁 Repository Contents
 
@@ -224,10 +238,12 @@ Edit the agent prompts in `AGENTS.md` to customize behavior for your project:
 ### Fixing a Bug
 
 ```
-1. Debugging Agent → Analyzes error
-2. Auto-Debugging Escalation → Searches solutions (if needed)
-3. Code Quality Agent → Reviews fix
-4. Code Validation Agent → Verifies fix
+1. Error Memory Agent → Checks if error occurred before
+2. Debugging Agent → Analyzes error
+3. Auto-Debugging Escalation → Searches solutions (if needed)
+4. Code Quality Agent → Reviews fix
+5. Code Validation Agent → Verifies fix
+6. Error Memory Agent → Records resolution for future
 ```
 
 ### API Development
