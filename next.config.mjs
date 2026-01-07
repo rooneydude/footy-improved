@@ -2,7 +2,15 @@
 // PWA integration adapted from: https://github.com/serwist/serwist (1,295 stars, MIT)
 // Library Research Agent: Integrated Serwist for PWA support
 
-const withSerwist = require("@serwist/next").default;
+import withSerwistInit from "@serwist/next";
+
+const withSerwist = withSerwistInit({
+  swSrc: "app/sw.ts",
+  swDest: "public/sw.js",
+  cacheOnNavigation: true,
+  reloadOnOnline: true,
+  disable: process.env.NODE_ENV === "development", // Disable in dev for easier debugging
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -54,11 +62,5 @@ const nextConfig = {
   },
 };
 
-// Wrap with Serwist for PWA support
-module.exports = withSerwist({
-  swSrc: "app/sw.ts",
-  swDest: "public/sw.js",
-  cacheOnNavigation: true,
-  reloadOnOnline: true,
-  disable: process.env.NODE_ENV === "development", // Disable in dev for easier debugging
-})(nextConfig);
+export default withSerwist(nextConfig);
+
