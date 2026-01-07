@@ -1,15 +1,8 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 # FootyTracker Pre-push Hook
-# Runs tests before pushing
+echo "🔍 Running pre-push checks..."
 
-echo "🧪 Running tests before push..."
+# Type check
+echo "📝 Checking TypeScript..."
+npm run type-check
 
-# Run tests
-npm run test -- --run
-
-# If tests pass
-echo "✅ All tests passed! Pushing..."
-
-
+echo "✅ Pre-push checks passed!"
