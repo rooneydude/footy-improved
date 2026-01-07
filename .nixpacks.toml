@@ -2,6 +2,12 @@
 [phases.setup]
 nixPkgs = ["nodejs_20", "npm"]
 
+[phases.install]
+cmds = ["npm install --legacy-peer-deps"]
+
+[phases.build]
+cmds = ["npx prisma generate", "npm run build -- --webpack"]
+
 [variables]
 NODE_VERSION = "20"
 NPM_CONFIG_LEGACY_PEER_DEPS = "true"
