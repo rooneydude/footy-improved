@@ -10,8 +10,8 @@
 
 | Metric | Count |
 |--------|-------|
-| Total Errors Recorded | 6 |
-| Errors Resolved | 6 |
+| Total Errors Recorded | 7 |
+| Errors Resolved | 7 |
 | Recurring Errors | 0 |
 
 ---
@@ -29,6 +29,38 @@
 ---
 
 ## 🟢 Resolved Errors
+
+### ERR-007: Railway Node.js Version Mismatch
+- **First Occurrence:** 2026-01-07
+- **Occurrence Count:** 1
+- **Error Type:** Deployment/Railway
+- **Error Message:** 
+```
+App requires Node.js >=20.9.0 but environment is using v18
+npm ci failing - preact@10.11.3 missing from lockfile
+```
+- **Context:** Railway deployment failed due to Node.js version and lockfile sync issues
+- **Root Cause:** Railway's default Nixpacks uses Node 18, and package-lock.json was out of sync
+- **Resolution:** 
+```json
+// package.json - add engines
+"engines": {
+  "node": ">=20.9.0"
+}
+```
+```toml
+# .nixpacks.toml - force Node 20
+[phases.setup]
+nixPkgs = ["nodejs_20", "npm"]
+```
+```bash
+# Sync lockfile
+npm install
+```
+- **Files Updated:** `package.json`, `.nixpacks.toml`, `package-lock.json`
+- **Prevention:** Always specify Node version in package.json engines and create .nixpacks.toml for Railway deployments
+
+---
 
 ### ERR-006: Prisma Transaction Timeout with Many Players
 - **First Occurrence:** 2026-01-07
