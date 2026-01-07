@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# FootyTracker Pre-push Hook
+# Runs tests before pushing
+
+echo "🧪 Running tests before push..."
+
+# Run tests
+npm run test -- --run
+
+# If tests pass
+echo "✅ All tests passed! Pushing..."
+
+

@@ -21,11 +21,33 @@ yarn-error.log*
 *.temp
 .cache/
 
-# Node modules (if any scripts are added later)
+# Node modules
 node_modules/
 
-# Environment files (if any are added)
+# Next.js build output
+.next/
+out/
+build/
+
+# TypeScript
+tsconfig.tsbuildinfo
+
+# Environment files
 .env
 .env.local
 .env.*.local
+.env.production.local
+
+# Vercel
+.vercel
+
+# PWA files (generated)
+public/sw.js
+public/sw.js.map
+public/workbox-*.js
+public/workbox-*.js.map
+
+# Backup files
+backup/
+
 

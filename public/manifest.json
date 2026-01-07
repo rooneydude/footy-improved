@@ -1,0 +1,42 @@
+{
+  "name": "FootyTracker",
+  "short_name": "FootyTracker",
+  "description": "Track your sports events, concerts, and live experiences",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0b",
+  "theme_color": "#0a0a0b",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "entertainment", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "Add Event",
+      "short_name": "Add",
+      "description": "Log a new event",
+      "url": "/events/new",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "View Events",
+      "short_name": "Events",
+      "description": "View your events",
+      "url": "/events",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

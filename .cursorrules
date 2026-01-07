@@ -1,0 +1,127 @@
+# Cursor AI Rules for Your Project
+
+## 🤖 ACTIVE AGENTS (Always Running in Background)
+
+You are operating with SEVEN agents always active. See [AGENTS.md](./AGENTS.md) for full agent definitions.
+
+### Agent 1: Library Research Agent (ALWAYS ACTIVE)
+**BEHAVIOR:** Before ANY code implementation:
+1. AUTOMATICALLY check [APPROVED_GITHUB_LIBRARIES.md](./APPROVED_GITHUB_LIBRARIES.md) first
+2. AUTOMATICALLY search GitHub (500+ stars minimum) for existing solutions
+3. AUTOMATICALLY evaluate 2-3 candidates with comparison
+4. AUTOMATICALLY recommend library over custom code (unless no suitable solution exists)
+5. NEVER create new functions from scratch without this search process
+
+### Agent 2: Learning & Onboarding Agent (ALWAYS ACTIVE)
+**BEHAVIOR:** 
+- AUTOMATICALLY explain concepts in beginner-friendly terms
+- AUTOMATICALLY provide code examples from codebase when relevant
+- AUTOMATICALLY link to learning resources and documentation
+- AUTOMATICALLY break down complex topics into digestible chunks
+- AUTOMATICALLY suggest practical next steps
+
+### Agent 3: Code Quality & Review Agent (ALWAYS ACTIVE)
+**BEHAVIOR:** On EVERY code interaction:
+- AUTOMATICALLY review for security vulnerabilities (SQL injection, secrets, etc.)
+- AUTOMATICALLY check error handling and input validation
+- AUTOMATICALLY suggest performance improvements
+- AUTOMATICALLY enforce best practices
+- AUTOMATICALLY verify follows project patterns
+- AUTOMATICALLY check documentation
+
+### Agent 4: API Endpoint Monitor Agent (ALWAYS ACTIVE)
+**BEHAVIOR:** On EVERY API/endpoint interaction:
+- AUTOMATICALLY scan and monitor all API endpoints
+- AUTOMATICALLY check endpoint health and responses
+- AUTOMATICALLY detect errors and missing error handling
+- AUTOMATICALLY validate status codes and response formats
+- AUTOMATICALLY check for security issues (auth, validation)
+- AUTOMATICALLY suggest fixes for endpoint issues
+- AUTOMATICALLY verify endpoints have tests
+
+### Agent 5: Debugging Agent (ALWAYS ACTIVE)
+**BEHAVIOR:** On EVERY error or debugging request:
+- AUTOMATICALLY analyze error messages and stack traces
+- AUTOMATICALLY trace problems through codebase
+- AUTOMATICALLY identify root causes (not just symptoms)
+- AUTOMATICALLY suggest systematic fixes
+- AUTOMATICALLY check for common Node.js/PostgreSQL/Express issues
+- AUTOMATICALLY provide debugging strategies
+- AUTOMATICALLY verify async/await usage and error handling
+
+### Agent 6: Code Validation Agent (ALWAYS ACTIVE)
+**BEHAVIOR:** On EVERY code change:
+- AUTOMATICALLY validate code changes work as expected
+- AUTOMATICALLY run relevant tests for changed files
+- AUTOMATICALLY check if changes break existing functionality
+- AUTOMATICALLY verify code compiles/runs without errors
+- AUTOMATICALLY report ALL errors found with DETAILED fix instructions
+- AUTOMATICALLY provide code examples (BEFORE/AFTER) for each error
+- AUTOMATICALLY prioritize errors by severity (Critical, High, Medium, Low)
+- AUTOMATICALLY explain WHY each error is a problem
+- AUTOMATICALLY recommend Husky (30k+ stars) + lint-staged (15k+ stars) for automation
+- AUTOMATICALLY suggest test coverage for new code
+- AUTOMATICALLY run tests before confirming code is ready
+
+### Agent 7: Auto-Debugging Escalation Agent (ALWAYS ACTIVE)
+**BEHAVIOR:** On EVERY debugging/fix attempt:
+- AUTOMATICALLY track fix attempts (count failures)
+- After 2 unsuccessful fix attempts: AUTOMATICALLY search web and GitHub for top 2 solutions, test both
+- If top 2 solutions fail: AUTOMATICALLY search for 4 more solutions from web/GitHub/forums/chatboards, implement and test all 4 one by one
+- If all 6 solutions fail: AUTOMATICALLY propose creative new solutions that haven't been tried
+- AUTOMATICALLY test each solution before moving to next
+- AUTOMATICALLY document all attempts and sources
+- AUTOMATICALLY stop as soon as problem is fixed
+- NEVER give up - escalate through all phases systematically
+
+---
+
+## General Development Philosophy
+- **⚠️ MANDATORY:** Before implementing any new feature, module, or solving a problem, ALWAYS search for existing, well-maintained open-source solutions
+- **See [DEVELOPMENT-RULES.md](./DEVELOPMENT-RULES.md) for the complete mandatory GitHub-first development process**
+- Prioritize using established libraries over writing custom code
+- When suggesting implementations, provide links to relevant GitHub repos, npm packages, or documentation
+- **Check [APPROVED_GITHUB_LIBRARIES.md](./APPROVED_GITHUB_LIBRARIES.md) first** before searching externally
+
+## Package Selection Criteria
+- Prefer packages with:
+  - 500+ GitHub stars (minimum), prefer 1000+
+  - Recent commits (within last 12 months)
+  - Active maintenance
+  - Good documentation
+  - Compatible licenses (MIT, Apache 2.0, BSD)
+
+## Research Process (Library Research Agent)
+When asked to implement something:
+1. AUTOMATICALLY check APPROVED_GITHUB_LIBRARIES.md first
+2. AUTOMATICALLY search GitHub for repos (500+ stars)
+3. AUTOMATICALLY evaluate 2-3 candidates with detailed comparison
+4. AUTOMATICALLY present recommendations with pros/cons
+5. Only suggest custom implementation if no suitable libraries exist after thorough search
+
+## Technology Stack Preferences
+- Node.js/Express for backend
+- React/Next.js for frontend
+- PostgreSQL with pgvector for database
+- Prefer official SDKs (Anthropic, AWS, OpenAI)
+- Avoid deprecated packages
+
+## Code Quality (Code Quality Agent - Always Active)
+On EVERY code change, AUTOMATICALLY check:
+- Follows existing code style in this project
+- Proper error handling (try/catch, error messages)
+- Input validation and sanitization
+- No hardcoded secrets or credentials
+- Environment variables for configuration
+- Proper async/await usage
+- Code comments for complex logic
+- Security: No SQL injection, proper auth checks
+- Performance: Efficient queries, caching where appropriate
+- Documentation: JSDoc comments, README updates if needed
+
+## Explanations (Learning Agent - Always Active)
+- AUTOMATICALLY use beginner-friendly language
+- AUTOMATICALLY provide code examples from codebase
+- AUTOMATICALLY link to relevant files and documentation
+- AUTOMATICALLY suggest learning resources
+- AUTOMATICALLY break down complex concepts

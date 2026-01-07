@@ -1,0 +1,190 @@
+/* FootyTracker - Dark Sports Theme
+   📚 Library Research Agent: tailwindcss (91,853 ⭐)
+   ✅ Code Quality Agent: Custom CSS variables for theming */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Dark Sports Theme - Primary */
+    --background: 240 6% 4%;
+    --foreground: 0 0% 98%;
+    
+    /* Cards and surfaces */
+    --card: 240 5% 7%;
+    --card-foreground: 0 0% 98%;
+    --card-hover: 240 5% 10%;
+    
+    /* Popovers and dropdowns */
+    --popover: 240 5% 7%;
+    --popover-foreground: 0 0% 98%;
+    
+    /* Primary accent - Electric blue */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Secondary */
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 0 0% 98%;
+    
+    /* Muted elements */
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 5% 65%;
+    
+    /* Accent colors */
+    --accent: 240 4% 16%;
+    --accent-foreground: 0 0% 98%;
+    --accent-green: 142 76% 36%;
+    --accent-yellow: 45 93% 47%;
+    --accent-blue: 217 91% 60%;
+    --accent-red: 0 84% 60%;
+    --accent-purple: 270 76% 60%;
+    --accent-orange: 24 95% 53%;
+    
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    
+    /* Borders and inputs */
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 217 91% 60%;
+    
+    /* Border radius */
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Custom scrollbar for dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+}
+
+@layer components {
+  /* Event type badges */
+  .badge-soccer {
+    @apply bg-green-500/10 text-green-400 border-green-500/20;
+  }
+  
+  .badge-basketball {
+    @apply bg-orange-500/10 text-orange-400 border-orange-500/20;
+  }
+  
+  .badge-baseball {
+    @apply bg-red-500/10 text-red-400 border-red-500/20;
+  }
+  
+  .badge-tennis {
+    @apply bg-yellow-500/10 text-yellow-400 border-yellow-500/20;
+  }
+  
+  .badge-concert {
+    @apply bg-purple-500/10 text-purple-400 border-purple-500/20;
+  }
+  
+  /* Card hover effects */
+  .card-hover {
+    @apply transition-all duration-200 hover:bg-card-hover hover:border-border/60;
+  }
+  
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent;
+  }
+  
+  /* Stats number styling */
+  .stat-number {
+    @apply font-mono text-3xl font-bold tabular-nums;
+  }
+  
+  /* Bottom navigation safe area */
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  
+  /* Glass effect for modals */
+  .glass {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+  }
+}
+
+@layer utilities {
+  /* Animation utilities */
+  .animate-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Pulse animation for achievements */
+  .animate-achievement {
+    animation: achievementPulse 0.5s ease-out;
+  }
+  
+  @keyframes achievementPulse {
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+}
