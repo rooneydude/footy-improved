@@ -68,7 +68,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       p.goals > 0 || p.assists > 0 || p.yellowCard || p.redCard || p.cleanSheet;
 
     // Combine all players with team designation
-    const players = [
+    let players = [
       ...homeAppearances.filter(hasStats).map((p) => ({
         playerId: p.playerId,
         playerName: p.playerName,
@@ -90,6 +90,96 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         cleanSheet: p.cleanSheet,
       })),
     ];
+
+    // If no players found from processMatchToAppearances but we have raw goals/bookings data,
+    // create player entries directly from that data
+    if (players.length === 0) {
+      const rawGoals = matchDetails.goals || [];
+      const rawBookings = matchDetails.bookings || [];
+      
+      // Create a map to deduplicate players
+      const playerMap = new Map<number, {
+        playerId: number;
+        playerName: string;
+        team: 'home' | 'away';
+        goals: number;
+        assists: number;
+        yellowCard: boolean;
+        redCard: boolean;
+        cleanSheet: boolean;
+      }>();
+
+      // Process goals
+      for (const goal of rawGoals) {
+        const isHome = goal.team?.id === matchDetails.homeTeam.id;
+        const team = isHome ? 'home' : 'away';
+        
+        // Add/update scorer
+        if (goal.scorer?.id) {
+          const existing = playerMap.get(goal.scorer.id);
+          if (existing) {
+            existing.goals++;
+          } else {
+            playerMap.set(goal.scorer.id, {
+              playerId: goal.scorer.id,
+              playerName: goal.scorer.name,
+              team,
+              goals: 1,
+              assists: 0,
+              yellowCard: false,
+              redCard: false,
+              cleanSheet: false,
+            });
+          }
+        }
+        
+        // Add/update assister
+        if (goal.assist?.id) {
+          const existing = playerMap.get(goal.assist.id);
+          if (existing) {
+            existing.assists++;
+          } else {
+            playerMap.set(goal.assist.id, {
+              playerId: goal.assist.id,
+              playerName: goal.assist.name,
+              team,
+              goals: 0,
+              assists: 1,
+              yellowCard: false,
+              redCard: false,
+              cleanSheet: false,
+            });
+          }
+        }
+      }
+
+      // Process bookings
+      for (const booking of rawBookings) {
+        const isHome = booking.team?.id === matchDetails.homeTeam.id;
+        const team = isHome ? 'home' : 'away';
+        
+        if (booking.player?.id) {
+          const existing = playerMap.get(booking.player.id);
+          if (existing) {
+            if (booking.card === 'YELLOW_CARD') existing.yellowCard = true;
+            if (booking.card === 'RED_CARD' || booking.card === 'YELLOW_RED_CARD') existing.redCard = true;
+          } else {
+            playerMap.set(booking.player.id, {
+              playerId: booking.player.id,
+              playerName: booking.player.name,
+              team,
+              goals: 0,
+              assists: 0,
+              yellowCard: booking.card === 'YELLOW_CARD',
+              redCard: booking.card === 'RED_CARD' || booking.card === 'YELLOW_RED_CARD',
+              cleanSheet: false,
+            });
+          }
+        }
+      }
+
+      players = Array.from(playerMap.values());
+    }
 
     return NextResponse.json({
       success: true,
