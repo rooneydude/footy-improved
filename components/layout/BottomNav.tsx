@@ -6,38 +6,40 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Calendar, BarChart3, MapPin, Trophy, Plus } from 'lucide-react';
+import { Home, Calendar, BarChart3, Trophy, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useModal } from './ModalProvider';
 
 const navItems = [
   { href: '/', icon: Home, label: 'Home' },
   { href: '/events', icon: Calendar, label: 'Events' },
-  { href: '/events/new', icon: Plus, label: 'Add', isAction: true },
+  { href: '#add', icon: Plus, label: 'Add', isAction: true },
   { href: '/stats', icon: BarChart3, label: 'Stats' },
   { href: '/achievements', icon: Trophy, label: 'Awards' },
 ];
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { openAddEvent } = useModal();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pb-safe">
       <div className="flex items-center justify-around h-16 max-w-md mx-auto px-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href || 
-            (item.href !== '/' && pathname.startsWith(item.href));
+            (item.href !== '/' && item.href !== '#add' && pathname.startsWith(item.href));
           const Icon = item.icon;
 
           if (item.isAction) {
             return (
-              <Link
+              <button
                 key={item.href}
-                href={item.href}
-                className="flex items-center justify-center w-14 h-14 -mt-6 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90 transition-colors"
+                onClick={openAddEvent}
+                className="flex items-center justify-center w-14 h-14 -mt-6 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all duration-200"
               >
                 <Icon className="h-6 w-6" />
                 <span className="sr-only">{item.label}</span>
-              </Link>
+              </button>
             );
           }
 

@@ -7,6 +7,8 @@
 import { SessionProvider } from 'next-auth/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, type ReactNode } from 'react';
+import { ModalProvider } from './ModalProvider';
+import { AddEventModal } from '@/components/shared/AddEventModal';
 
 interface ProvidersProps {
   children: ReactNode;
@@ -29,7 +31,10 @@ export function Providers({ children }: ProvidersProps) {
   return (
     <SessionProvider>
       <QueryClientProvider client={queryClient}>
-        {children}
+        <ModalProvider>
+          {children}
+          <AddEventModal />
+        </ModalProvider>
       </QueryClientProvider>
     </SessionProvider>
   );

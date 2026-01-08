@@ -121,9 +121,19 @@
     @apply bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent;
   }
   
+  /* Fire gradient text for streaks */
+  .gradient-text-fire {
+    @apply bg-gradient-to-r from-orange-400 via-red-400 to-yellow-400 bg-clip-text text-transparent;
+  }
+  
   /* Stats number styling */
   .stat-number {
     @apply font-mono text-3xl font-bold tabular-nums;
+  }
+  
+  /* Compact stat number */
+  .stat-number-compact {
+    @apply font-mono text-xl font-bold tabular-nums;
   }
   
   /* Bottom navigation safe area */
@@ -131,9 +141,36 @@
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
   
+  /* Safe area height */
+  .h-safe {
+    height: env(safe-area-inset-bottom, 1rem);
+  }
+  
   /* Glass effect for modals */
   .glass {
-    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+    @apply bg-card/90 backdrop-blur-xl border border-border/50;
+  }
+  
+  /* Premium glass card */
+  .glass-card {
+    @apply bg-card/60 backdrop-blur-md border border-border/40 shadow-xl;
+  }
+  
+  /* Premium card with hover effects */
+  .card-premium {
+    @apply bg-card border border-border rounded-2xl transition-all duration-300;
+    @apply hover:border-border/60 hover:shadow-lg hover:shadow-primary/5;
+    @apply hover:-translate-y-0.5;
+  }
+  
+  /* Streak glow effect */
+  .streak-glow {
+    background: radial-gradient(
+      circle at center,
+      hsl(24 100% 50% / 0.15) 0%,
+      transparent 70%
+    );
+    animation: pulse-glow 2s ease-in-out infinite;
   }
 }
 
@@ -154,8 +191,21 @@
     }
   }
   
+  .animate-fade-in {
+    animation: fadeInOnly 0.2s ease-out;
+  }
+  
+  @keyframes fadeInOnly {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
   .animate-slide-up {
-    animation: slideUp 0.3s ease-out;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
   
   @keyframes slideUp {
@@ -185,6 +235,32 @@
     100% {
       transform: scale(1);
       opacity: 1;
+    }
+  }
+  
+  /* Glow pulse for streaks */
+  @keyframes pulse-glow {
+    0%, 100% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+  
+  /* Card entrance animation */
+  .animate-card-in {
+    animation: cardIn 0.4s ease-out backwards;
+  }
+  
+  @keyframes cardIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
     }
   }
 }
