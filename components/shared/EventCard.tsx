@@ -1,16 +1,24 @@
 'use client';
 
 // Event Card Component
-// ✅ Code Quality Agent: Premium reusable event display card
+// ✅ Code Quality Agent: Premium reusable event display card with logos
 
 import Link from 'next/link';
 import { MapPin, Calendar, Star, ChevronRight } from 'lucide-react';
-import { cn, getEventEmoji, formatRelativeDate, formatShortDate } from '@/lib/utils';
+import { cn, formatRelativeDate } from '@/lib/utils';
+import { TeamLogo, ArtistPhoto } from './TeamLogo';
 import type { EventWithRelations } from '@/types';
 
 interface EventCardProps {
   event: EventWithRelations;
   index?: number;
+  logos?: {
+    home?: string | null;
+    away?: string | null;
+    artist?: string | null;
+    player1?: string | null;
+    player2?: string | null;
+  };
 }
 
 // Get gradient colors for each event type
@@ -47,48 +55,60 @@ function getScoreBadgeColor(type: string): string {
   return colors[type] || 'bg-gray-500/20 text-gray-300';
 }
 
-export function EventCard({ event, index = 0 }: EventCardProps) {
-  const emoji = getEventEmoji(event.type);
+export function EventCard({ event, index = 0, logos }: EventCardProps) {
   const gradient = getEventGradient(event.type);
   const borderColor = getEventBorderColor(event.type);
   const scoreBadgeColor = getScoreBadgeColor(event.type);
 
-  // Get event title and score based on type
-  let title = '';
+  // Get event details based on type
+  let homeTeam = '';
+  let awayTeam = '';
   let score = '';
+  let artistName = '';
+  let tourName = '';
+  let player1Name = '';
+  let player2Name = '';
 
   switch (event.type) {
     case 'SOCCER':
       if (event.soccerMatch) {
-        title = `${event.soccerMatch.homeTeam} vs ${event.soccerMatch.awayTeam}`;
+        homeTeam = event.soccerMatch.homeTeam;
+        awayTeam = event.soccerMatch.awayTeam;
         score = `${event.soccerMatch.homeScore} - ${event.soccerMatch.awayScore}`;
       }
       break;
     case 'BASKETBALL':
       if (event.basketballGame) {
-        title = `${event.basketballGame.homeTeam} vs ${event.basketballGame.awayTeam}`;
+        homeTeam = event.basketballGame.homeTeam;
+        awayTeam = event.basketballGame.awayTeam;
         score = `${event.basketballGame.homeScore} - ${event.basketballGame.awayScore}`;
       }
       break;
     case 'BASEBALL':
       if (event.baseballGame) {
-        title = `${event.baseballGame.homeTeam} vs ${event.baseballGame.awayTeam}`;
+        homeTeam = event.baseballGame.homeTeam;
+        awayTeam = event.baseballGame.awayTeam;
         score = `${event.baseballGame.homeScore} - ${event.baseballGame.awayScore}`;
       }
       break;
     case 'TENNIS':
       if (event.tennisMatch) {
-        title = `${event.tennisMatch.player1.name} vs ${event.tennisMatch.player2.name}`;
+        player1Name = event.tennisMatch.player1.name;
+        player2Name = event.tennisMatch.player2.name;
         score = event.tennisMatch.score;
       }
       break;
     case 'CONCERT':
       if (event.concert) {
-        title = event.concert.artist.name;
-        score = event.concert.tourName || '';
+        artistName = event.concert.artist.name;
+        tourName = event.concert.tourName || '';
       }
       break;
   }
+
+  const isSportMatch = ['SOCCER', 'BASKETBALL', 'BASEBALL'].includes(event.type);
+  const isTennis = event.type === 'TENNIS';
+  const isConcert = event.type === 'CONCERT';
 
   return (
     <Link
@@ -105,59 +125,143 @@ export function EventCard({ event, index = 0 }: EventCardProps) {
       <div className={cn('absolute inset-0 bg-gradient-to-br', gradient)} />
 
       {/* Content */}
-      <div className="relative flex items-start gap-4">
-        {/* Large emoji */}
-        <div className="flex-shrink-0">
-          <span className="text-5xl block">{emoji}</span>
-        </div>
-
-        {/* Main content */}
-        <div className="flex-1 min-w-0">
-          {/* Title */}
-          <h3 className="font-bold text-lg truncate pr-6">{title || 'Event'}</h3>
-
-          {/* Score badge */}
-          {score && (
-            <span
-              className={cn(
-                'inline-flex items-center px-3 py-1 rounded-full text-sm font-mono font-bold mt-2',
-                scoreBadgeColor
-              )}
-            >
-              {score}
-            </span>
-          )}
-
-          {/* Meta info */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <Calendar className="h-4 w-4" />
-              <span className="font-medium">{formatRelativeDate(event.date)}</span>
-            </span>
-            <span className="flex items-center gap-1.5 truncate">
-              <MapPin className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate">{event.venue.name}</span>
-            </span>
-          </div>
-
-          {/* Rating */}
-          {event.rating && (
-            <div className="flex items-center gap-1 mt-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star
-                  key={i}
-                  className={cn(
-                    'h-4 w-4',
-                    i < event.rating! ? 'text-yellow-400 fill-yellow-400' : 'text-muted/40'
-                  )}
-                />
-              ))}
+      <div className="relative">
+        {/* Sports match layout with logos */}
+        {isSportMatch && (
+          <div className="flex items-center gap-3">
+            {/* Home team */}
+            <div className="flex flex-col items-center gap-1 min-w-[60px]">
+              <TeamLogo
+                logoUrl={logos?.home}
+                teamName={homeTeam}
+                size="lg"
+                sport={event.type as 'SOCCER' | 'BASKETBALL' | 'BASEBALL'}
+              />
+              <span className="text-xs text-muted-foreground text-center truncate max-w-[70px]">
+                {homeTeam.split(' ').slice(-1)[0]}
+              </span>
             </div>
-          )}
+
+            {/* Score */}
+            <div className="flex-1 text-center">
+              <span
+                className={cn(
+                  'inline-flex items-center px-4 py-2 rounded-xl text-xl font-mono font-bold',
+                  scoreBadgeColor
+                )}
+              >
+                {score}
+              </span>
+            </div>
+
+            {/* Away team */}
+            <div className="flex flex-col items-center gap-1 min-w-[60px]">
+              <TeamLogo
+                logoUrl={logos?.away}
+                teamName={awayTeam}
+                size="lg"
+                sport={event.type as 'SOCCER' | 'BASKETBALL' | 'BASEBALL'}
+              />
+              <span className="text-xs text-muted-foreground text-center truncate max-w-[70px]">
+                {awayTeam.split(' ').slice(-1)[0]}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Tennis layout */}
+        {isTennis && (
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-center gap-1 min-w-[60px]">
+              <TeamLogo
+                logoUrl={logos?.player1}
+                teamName={player1Name}
+                size="lg"
+                sport="TENNIS"
+              />
+              <span className="text-xs text-muted-foreground text-center truncate max-w-[70px]">
+                {player1Name.split(' ').slice(-1)[0]}
+              </span>
+            </div>
+
+            <div className="flex-1 text-center">
+              <span
+                className={cn(
+                  'inline-flex items-center px-4 py-2 rounded-xl text-lg font-mono font-bold',
+                  scoreBadgeColor
+                )}
+              >
+                {score}
+              </span>
+            </div>
+
+            <div className="flex flex-col items-center gap-1 min-w-[60px]">
+              <TeamLogo
+                logoUrl={logos?.player2}
+                teamName={player2Name}
+                size="lg"
+                sport="TENNIS"
+              />
+              <span className="text-xs text-muted-foreground text-center truncate max-w-[70px]">
+                {player2Name.split(' ').slice(-1)[0]}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Concert layout */}
+        {isConcert && (
+          <div className="flex items-center gap-4">
+            <ArtistPhoto
+              photoUrl={logos?.artist || event.concert?.artist.photoUrl}
+              artistName={artistName}
+              size="xl"
+            />
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-lg truncate">{artistName}</h3>
+              {tourName && (
+                <span
+                  className={cn(
+                    'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1',
+                    scoreBadgeColor
+                  )}
+                >
+                  {tourName}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Meta info */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-4 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <Calendar className="h-4 w-4" />
+            <span className="font-medium">{formatRelativeDate(event.date)}</span>
+          </span>
+          <span className="flex items-center gap-1.5 truncate">
+            <MapPin className="h-4 w-4 flex-shrink-0" />
+            <span className="truncate">{event.venue.name}</span>
+          </span>
         </div>
+
+        {/* Rating */}
+        {event.rating && (
+          <div className="flex items-center gap-1 mt-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star
+                key={i}
+                className={cn(
+                  'h-4 w-4',
+                  i < event.rating! ? 'text-yellow-400 fill-yellow-400' : 'text-muted/40'
+                )}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Arrow indicator */}
-        <div className="absolute top-1/2 right-2 -translate-y-1/2">
+        <div className="absolute top-1/2 right-0 -translate-y-1/2">
           <ChevronRight className="h-5 w-5 text-muted-foreground/50" />
         </div>
       </div>

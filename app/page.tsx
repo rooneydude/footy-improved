@@ -12,7 +12,56 @@ import { Header } from '@/components/layout/Header';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { EventCard } from '@/components/shared/EventCard';
 import { StreakHighlight } from '@/components/shared/StreakHighlight';
+import {
+  getTeamLogoUrl,
+  getNBATeamLogo,
+  getMLBTeamLogo,
+} from '@/lib/api/team-logos';
 import type { EventWithRelations } from '@/types';
+
+// Helper to get logos for an event
+async function getEventLogos(
+  event: EventWithRelations
+): Promise<{ home?: string | null; away?: string | null; artist?: string | null }> {
+  const logos: { home?: string | null; away?: string | null; artist?: string | null } = {};
+
+  switch (event.type) {
+    case 'SOCCER':
+      if (event.soccerMatch) {
+        // Try to find teams in database first
+        const [homeTeam, awayTeam] = await Promise.all([
+          prisma.team.findFirst({
+            where: { name: event.soccerMatch.homeTeam, sport: 'SOCCER' },
+          }),
+          prisma.team.findFirst({
+            where: { name: event.soccerMatch.awayTeam, sport: 'SOCCER' },
+          }),
+        ]);
+        logos.home = homeTeam?.logoUrl || null;
+        logos.away = awayTeam?.logoUrl || null;
+      }
+      break;
+    case 'BASKETBALL':
+      if (event.basketballGame) {
+        logos.home = getNBATeamLogo(event.basketballGame.homeTeam);
+        logos.away = getNBATeamLogo(event.basketballGame.awayTeam);
+      }
+      break;
+    case 'BASEBALL':
+      if (event.baseballGame) {
+        logos.home = getMLBTeamLogo(event.baseballGame.homeTeam);
+        logos.away = getMLBTeamLogo(event.baseballGame.awayTeam);
+      }
+      break;
+    case 'CONCERT':
+      if (event.concert?.artist) {
+        logos.artist = event.concert.artist.photoUrl;
+      }
+      break;
+  }
+
+  return logos;
+}
 
 export default async function HomePage() {
   const session = await getServerSession(authOptions);
@@ -61,6 +110,11 @@ export default async function HomePage() {
       },
     }),
   ]);
+
+  // Fetch logos for all events
+  const eventLogos = await Promise.all(
+    recentEvents.map((event) => getEventLogos(event as EventWithRelations))
+  );
 
   const totalEvents = stats.reduce((sum, s) => sum + s._count.type, 0);
   const eventsByType: Record<string, number> = {};
@@ -136,6 +190,7 @@ export default async function HomePage() {
                   key={event.id}
                   event={event as EventWithRelations}
                   index={index}
+                  logos={eventLogos[index]}
                 />
               ))}
             </div>
