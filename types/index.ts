@@ -121,11 +121,14 @@ export interface SoccerFormInput extends EventFormInput {
   appearances?: SoccerAppearanceInput[];
 }
 
-// Simplified appearance inputs - KEY STATS ONLY
+// Soccer appearance inputs
 export interface SoccerAppearanceInput {
   playerName: string;
   goals?: number;
   assists?: number;
+  yellowCard?: boolean;
+  redCard?: boolean;
+  cleanSheet?: boolean;
 }
 
 export interface BasketballFormInput extends EventFormInput {

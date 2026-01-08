@@ -63,21 +63,31 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     // Process into player appearances
     const { homeAppearances, awayAppearances } = processMatchToAppearances(matchDetails);
 
-    // Combine all players with team designation (KEY STATS ONLY: Goals & Assists)
+    // Filter to only players with meaningful stats (scored, assisted, got carded, or kept clean sheet)
+    const hasStats = (p: typeof homeAppearances[0]) => 
+      p.goals > 0 || p.assists > 0 || p.yellowCard || p.redCard || p.cleanSheet;
+
+    // Combine all players with team designation
     const players = [
-      ...homeAppearances.map((p) => ({
+      ...homeAppearances.filter(hasStats).map((p) => ({
         playerId: p.playerId,
         playerName: p.playerName,
         team: 'home' as const,
         goals: p.goals,
         assists: p.assists,
+        yellowCard: p.yellowCard,
+        redCard: p.redCard,
+        cleanSheet: p.cleanSheet,
       })),
-      ...awayAppearances.map((p) => ({
+      ...awayAppearances.filter(hasStats).map((p) => ({
         playerId: p.playerId,
         playerName: p.playerName,
         team: 'away' as const,
         goals: p.goals,
         assists: p.assists,
+        yellowCard: p.yellowCard,
+        redCard: p.redCard,
+        cleanSheet: p.cleanSheet,
       })),
     ];
 

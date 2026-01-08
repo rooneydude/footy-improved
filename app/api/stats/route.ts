@@ -128,14 +128,31 @@ export async function GET() {
     ]).size;
 
     // Return in format expected by stats page
+    // Stats are now separated by sport to avoid confusion
     return NextResponse.json({
       totalEvents,
       eventsByType: eventsByTypeMap,
       uniqueVenues,
       uniquePlayersWitnessed: uniquePlayers,
+      // Sport-specific stats - never mix stats across different sports
+      soccerStats: {
+        goalsWitnessed: soccerAppearances._sum.goals || 0,
+        assistsWitnessed: soccerAppearances._sum.assists || 0,
+      },
+      basketballStats: {
+        pointsWitnessed: basketballAppearances._sum.points || 0,
+        reboundsWitnessed: basketballAppearances._sum.rebounds || 0,
+        assistsWitnessed: basketballAppearances._sum.assists || 0,
+      },
+      baseballStats: {
+        hitsWitnessed: baseballAppearances._sum.hits || 0,
+        homeRunsWitnessed: baseballAppearances._sum.homeRuns || 0,
+        rbisWitnessed: baseballAppearances._sum.rbis || 0,
+      },
+      // Legacy aggregateStats for backwards compatibility (deprecated)
       aggregateStats: {
         goalsWitnessed: soccerAppearances._sum.goals || 0,
-        assistsWitnessed: (soccerAppearances._sum.assists || 0) + (basketballAppearances._sum.assists || 0),
+        assistsWitnessed: soccerAppearances._sum.assists || 0, // Now soccer-only
         pointsWitnessed: basketballAppearances._sum.points || 0,
         reboundsWitnessed: basketballAppearances._sum.rebounds || 0,
         hitsWitnessed: baseballAppearances._sum.hits || 0,

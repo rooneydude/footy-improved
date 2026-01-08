@@ -22,19 +22,24 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   );
 }
 
-// Add GitHub OAuth if configured
-if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
+// Add GitHub OAuth if configured (support both GITHUB_ID and GITHUB_CLIENT_ID)
+const githubId = process.env.GITHUB_CLIENT_ID || process.env.GITHUB_ID;
+const githubSecret = process.env.GITHUB_CLIENT_SECRET || process.env.GITHUB_SECRET;
+if (githubId && githubSecret) {
   providers.push(
     GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      clientId: githubId,
+      clientSecret: githubSecret,
     })
   );
 }
 
 // Add Demo account provider for development/testing
-// ✅ Code Quality Agent: Demo provider only available when no OAuth configured or in dev
-if (providers.length === 0 || process.env.NODE_ENV === 'development') {
+// ✅ Code Quality Agent: Demo provider available in dev, when no OAuth, or when explicitly enabled
+const enableDemo = providers.length === 0 || 
+  process.env.NODE_ENV === 'development' || 
+  process.env.ENABLE_DEMO_ACCOUNT === 'true';
+if (enableDemo) {
   providers.push(
     CredentialsProvider({
       id: 'demo',

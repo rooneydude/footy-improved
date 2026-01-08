@@ -27,6 +27,22 @@ interface OverviewStats {
   eventsByType: Record<string, number>;
   uniqueVenues: number;
   uniquePlayersWitnessed: number;
+  // Sport-specific stats (new format)
+  soccerStats?: {
+    goalsWitnessed: number;
+    assistsWitnessed: number;
+  };
+  basketballStats?: {
+    pointsWitnessed: number;
+    reboundsWitnessed: number;
+    assistsWitnessed: number;
+  };
+  baseballStats?: {
+    hitsWitnessed: number;
+    homeRunsWitnessed: number;
+    rbisWitnessed: number;
+  };
+  // Legacy format (backwards compatibility)
   aggregateStats: {
     goalsWitnessed: number;
     assistsWitnessed: number;
@@ -201,7 +217,7 @@ export default function StatsPage() {
           </Card>
         )}
 
-        {/* Aggregate Stats */}
+        {/* Sport-Specific Stats - organized by sport to avoid confusion */}
         {stats && (
           <Card className="mb-6">
             <CardHeader>
@@ -210,57 +226,90 @@ export default function StatsPage() {
                 What You've Witnessed
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {stats.aggregateStats.goalsWitnessed > 0 && (
-                  <div className="p-3 rounded-lg bg-secondary/30">
-                    <div className="text-sm text-muted-foreground">Goals</div>
-                    <div className="text-2xl font-bold text-green-400">
-                      {stats.aggregateStats.goalsWitnessed} ⚽
+            <CardContent className="space-y-4">
+              {/* Soccer Stats */}
+              {(stats.soccerStats?.goalsWitnessed || stats.soccerStats?.assistsWitnessed || 
+                stats.aggregateStats.goalsWitnessed > 0) && (
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1">
+                    ⚽ Soccer
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 rounded-lg bg-green-500/10">
+                      <div className="text-sm text-muted-foreground">Goals</div>
+                      <div className="text-2xl font-bold text-green-400">
+                        {stats.soccerStats?.goalsWitnessed ?? stats.aggregateStats.goalsWitnessed}
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-lg bg-green-500/10">
+                      <div className="text-sm text-muted-foreground">Assists</div>
+                      <div className="text-2xl font-bold text-green-400">
+                        {stats.soccerStats?.assistsWitnessed ?? stats.aggregateStats.assistsWitnessed}
+                      </div>
                     </div>
                   </div>
-                )}
-                {stats.aggregateStats.assistsWitnessed > 0 && (
-                  <div className="p-3 rounded-lg bg-secondary/30">
-                    <div className="text-sm text-muted-foreground">Assists</div>
-                    <div className="text-2xl font-bold text-blue-400">
-                      {stats.aggregateStats.assistsWitnessed} 🎯
+                </div>
+              )}
+
+              {/* Basketball Stats */}
+              {(stats.basketballStats?.pointsWitnessed || stats.basketballStats?.reboundsWitnessed ||
+                stats.aggregateStats.pointsWitnessed > 0) && (
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1">
+                    🏀 Basketball
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="p-3 rounded-lg bg-orange-500/10">
+                      <div className="text-sm text-muted-foreground">Points</div>
+                      <div className="text-2xl font-bold text-orange-400">
+                        {stats.basketballStats?.pointsWitnessed ?? stats.aggregateStats.pointsWitnessed}
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-lg bg-orange-500/10">
+                      <div className="text-sm text-muted-foreground">Rebounds</div>
+                      <div className="text-2xl font-bold text-orange-400">
+                        {stats.basketballStats?.reboundsWitnessed ?? stats.aggregateStats.reboundsWitnessed}
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-lg bg-orange-500/10">
+                      <div className="text-sm text-muted-foreground">Assists</div>
+                      <div className="text-2xl font-bold text-orange-400">
+                        {stats.basketballStats?.assistsWitnessed ?? 0}
+                      </div>
                     </div>
                   </div>
-                )}
-                {stats.aggregateStats.pointsWitnessed > 0 && (
-                  <div className="p-3 rounded-lg bg-secondary/30">
-                    <div className="text-sm text-muted-foreground">Points</div>
-                    <div className="text-2xl font-bold text-orange-400">
-                      {stats.aggregateStats.pointsWitnessed} 🏀
+                </div>
+              )}
+
+              {/* Baseball Stats */}
+              {(stats.baseballStats?.homeRunsWitnessed || stats.baseballStats?.hitsWitnessed ||
+                stats.aggregateStats.homeRunsWitnessed > 0 || stats.aggregateStats.hitsWitnessed > 0) && (
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1">
+                    ⚾ Baseball
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="p-3 rounded-lg bg-red-500/10">
+                      <div className="text-sm text-muted-foreground">Home Runs</div>
+                      <div className="text-2xl font-bold text-red-400">
+                        {stats.baseballStats?.homeRunsWitnessed ?? stats.aggregateStats.homeRunsWitnessed}
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-lg bg-red-500/10">
+                      <div className="text-sm text-muted-foreground">Hits</div>
+                      <div className="text-2xl font-bold text-red-400">
+                        {stats.baseballStats?.hitsWitnessed ?? stats.aggregateStats.hitsWitnessed}
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-lg bg-red-500/10">
+                      <div className="text-sm text-muted-foreground">RBIs</div>
+                      <div className="text-2xl font-bold text-red-400">
+                        {stats.baseballStats?.rbisWitnessed ?? 0}
+                      </div>
                     </div>
                   </div>
-                )}
-                {stats.aggregateStats.reboundsWitnessed > 0 && (
-                  <div className="p-3 rounded-lg bg-secondary/30">
-                    <div className="text-sm text-muted-foreground">Rebounds</div>
-                    <div className="text-2xl font-bold text-orange-400">
-                      {stats.aggregateStats.reboundsWitnessed}
-                    </div>
-                  </div>
-                )}
-                {stats.aggregateStats.homeRunsWitnessed > 0 && (
-                  <div className="p-3 rounded-lg bg-secondary/30">
-                    <div className="text-sm text-muted-foreground">Home Runs</div>
-                    <div className="text-2xl font-bold text-red-400">
-                      {stats.aggregateStats.homeRunsWitnessed} ⚾
-                    </div>
-                  </div>
-                )}
-                {stats.aggregateStats.hitsWitnessed > 0 && (
-                  <div className="p-3 rounded-lg bg-secondary/30">
-                    <div className="text-sm text-muted-foreground">Hits</div>
-                    <div className="text-2xl font-bold text-red-400">
-                      {stats.aggregateStats.hitsWitnessed}
-                    </div>
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}

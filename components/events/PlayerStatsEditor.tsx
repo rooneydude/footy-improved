@@ -21,10 +21,13 @@ interface BasePlayer {
   team: 'home' | 'away';
 }
 
-// Soccer player stats - KEY STATS ONLY: Goals & Assists
+// Soccer player stats: Goals, Assists, Cards, Clean Sheets
 export interface SoccerPlayer extends BasePlayer {
   goals: number;
   assists: number;
+  yellowCard: boolean;
+  redCard: boolean;
+  cleanSheet: boolean;
 }
 
 // Basketball player stats - KEY STAT ONLY: Points
@@ -79,6 +82,9 @@ export function PlayerStatsEditor({
           ...base,
           goals: 0,
           assists: 0,
+          yellowCard: false,
+          redCard: false,
+          cleanSheet: false,
         } as SoccerPlayer;
       case 'basketball':
         return {
@@ -137,27 +143,54 @@ export function PlayerStatsEditor({
       case 'soccer':
         const soccerPlayer = player as SoccerPlayer;
         return (
-          <div className="flex items-center gap-4 mt-2">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">⚽</span>
+          <div className="flex flex-wrap items-center gap-3 mt-2">
+            <div className="flex items-center gap-1">
+              <span className="text-sm">⚽</span>
               <Input
                 type="number"
                 min="0"
                 value={soccerPlayer.goals}
                 onChange={(e) => updatePlayer(globalIndex, { goals: parseInt(e.target.value) || 0 })}
-                className="h-8 text-sm text-center font-mono w-16"
+                className="h-7 text-sm text-center font-mono w-12"
               />
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-lg">🅰️</span>
+            <div className="flex items-center gap-1">
+              <span className="text-sm">🅰️</span>
               <Input
                 type="number"
                 min="0"
                 value={soccerPlayer.assists}
                 onChange={(e) => updatePlayer(globalIndex, { assists: parseInt(e.target.value) || 0 })}
-                className="h-8 text-sm text-center font-mono w-16"
+                className="h-7 text-sm text-center font-mono w-12"
               />
             </div>
+            <label className="flex items-center gap-1 text-xs cursor-pointer">
+              <input
+                type="checkbox"
+                checked={soccerPlayer.yellowCard}
+                onChange={(e) => updatePlayer(globalIndex, { yellowCard: e.target.checked })}
+                className="rounded w-3 h-3"
+              />
+              🟨
+            </label>
+            <label className="flex items-center gap-1 text-xs cursor-pointer">
+              <input
+                type="checkbox"
+                checked={soccerPlayer.redCard}
+                onChange={(e) => updatePlayer(globalIndex, { redCard: e.target.checked })}
+                className="rounded w-3 h-3"
+              />
+              🟥
+            </label>
+            <label className="flex items-center gap-1 text-xs cursor-pointer">
+              <input
+                type="checkbox"
+                checked={soccerPlayer.cleanSheet}
+                onChange={(e) => updatePlayer(globalIndex, { cleanSheet: e.target.checked })}
+                className="rounded w-3 h-3"
+              />
+              🧤
+            </label>
           </div>
         );
 
@@ -282,7 +315,7 @@ export function PlayerStatsEditor({
   // Get the stat label for the header
   const getStatLabel = (): string => {
     switch (sportType) {
-      case 'soccer': return 'Goals & Assists';
+      case 'soccer': return 'Goals, Assists, Cards';
       case 'basketball': return 'Points';
       case 'baseball': return 'Home Runs & RBIs';
       case 'tennis': return 'Winner';
@@ -350,7 +383,7 @@ export function PlayerStatsEditor({
           {/* Stats Legend */}
           <div className="text-xs text-muted-foreground border-t border-border pt-4">
             <span className="font-medium">Tracking: </span>
-            {sportType === 'soccer' && '⚽ Goals • 🅰️ Assists'}
+            {sportType === 'soccer' && '⚽ Goals • 🅰️ Assists • 🟨 Yellow • 🟥 Red • 🧤 Clean Sheet'}
             {sportType === 'basketball' && '🏀 Points scored'}
             {sportType === 'baseball' && '💣 Home Runs • RBI = Runs Batted In'}
             {sportType === 'tennis' && '🏆 Match winner'}

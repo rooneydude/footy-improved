@@ -57,13 +57,16 @@ export interface BaseballGameResult {
 export type SportType = 'soccer' | 'basketball' | 'baseball';
 export type MatchResult = SoccerMatchResult | BasketballGameResult | BaseballGameResult;
 
-// Player appearance types for each sport - KEY STATS ONLY
+// Player appearance types for each sport
 export interface SoccerPlayerAppearance {
   playerId: number;
   playerName: string;
   team: 'home' | 'away';
   goals: number;
   assists: number;
+  yellowCard: boolean;
+  redCard: boolean;
+  cleanSheet: boolean;
 }
 
 export interface BasketballPlayerAppearance {

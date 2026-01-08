@@ -99,7 +99,7 @@ export default function SoccerFormPage() {
     }
   };
 
-  // Handle players loaded from API (KEY STATS ONLY: Goals & Assists)
+  // Handle players loaded from API
   const handlePlayersLoaded = (loadedPlayers: PlayerAppearance[]) => {
     const soccerPlayers = loadedPlayers as SoccerPlayerAppearance[];
     const formattedPlayers: SoccerPlayer[] = soccerPlayers.map((p) => ({
@@ -108,6 +108,9 @@ export default function SoccerFormPage() {
       team: p.team,
       goals: p.goals,
       assists: p.assists,
+      yellowCard: p.yellowCard,
+      redCard: p.redCard,
+      cleanSheet: p.cleanSheet,
     }));
     setPlayers(formattedPlayers);
   };
@@ -123,6 +126,9 @@ export default function SoccerFormPage() {
           team: p.team,
           goals: p.goals,
           assists: p.assists,
+          yellowCard: p.yellowCard,
+          redCard: p.redCard,
+          cleanSheet: p.cleanSheet,
         })),
       };
 
