@@ -143,54 +143,74 @@ export function PlayerStatsEditor({
       case 'soccer':
         const soccerPlayer = player as SoccerPlayer;
         return (
-          <div className="flex flex-wrap items-center gap-3 mt-2">
-            <div className="flex items-center gap-1">
-              <span className="text-sm">⚽</span>
-              <Input
-                type="number"
-                min="0"
-                value={soccerPlayer.goals}
-                onChange={(e) => updatePlayer(globalIndex, { goals: parseInt(e.target.value) || 0 })}
-                className="h-7 text-sm text-center font-mono w-12"
-              />
+          <div className="grid grid-cols-5 gap-2 items-center">
+            {/* Goals */}
+            <div className="flex flex-col items-center">
+              <span className="text-xs text-muted-foreground mb-1">Goals</span>
+              <div className="flex items-center gap-1">
+                <span className="text-base">⚽</span>
+                <Input
+                  type="number"
+                  min="0"
+                  value={soccerPlayer.goals}
+                  onChange={(e) => updatePlayer(globalIndex, { goals: parseInt(e.target.value) || 0 })}
+                  className="h-8 text-sm text-center font-mono w-14"
+                />
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              <span className="text-sm">🅰️</span>
-              <Input
-                type="number"
-                min="0"
-                value={soccerPlayer.assists}
-                onChange={(e) => updatePlayer(globalIndex, { assists: parseInt(e.target.value) || 0 })}
-                className="h-7 text-sm text-center font-mono w-12"
-              />
+            {/* Assists */}
+            <div className="flex flex-col items-center">
+              <span className="text-xs text-muted-foreground mb-1">Assists</span>
+              <div className="flex items-center gap-1">
+                <span className="text-base">🅰️</span>
+                <Input
+                  type="number"
+                  min="0"
+                  value={soccerPlayer.assists}
+                  onChange={(e) => updatePlayer(globalIndex, { assists: parseInt(e.target.value) || 0 })}
+                  className="h-8 text-sm text-center font-mono w-14"
+                />
+              </div>
             </div>
-            <label className="flex items-center gap-1 text-xs cursor-pointer">
-              <input
-                type="checkbox"
-                checked={soccerPlayer.yellowCard}
-                onChange={(e) => updatePlayer(globalIndex, { yellowCard: e.target.checked })}
-                className="rounded w-3 h-3"
-              />
-              🟨
-            </label>
-            <label className="flex items-center gap-1 text-xs cursor-pointer">
-              <input
-                type="checkbox"
-                checked={soccerPlayer.redCard}
-                onChange={(e) => updatePlayer(globalIndex, { redCard: e.target.checked })}
-                className="rounded w-3 h-3"
-              />
-              🟥
-            </label>
-            <label className="flex items-center gap-1 text-xs cursor-pointer">
-              <input
-                type="checkbox"
-                checked={soccerPlayer.cleanSheet}
-                onChange={(e) => updatePlayer(globalIndex, { cleanSheet: e.target.checked })}
-                className="rounded w-3 h-3"
-              />
-              🧤
-            </label>
+            {/* Yellow Card */}
+            <div className="flex flex-col items-center">
+              <span className="text-xs text-muted-foreground mb-1">Yellow</span>
+              <label className="flex items-center justify-center cursor-pointer h-8">
+                <input
+                  type="checkbox"
+                  checked={soccerPlayer.yellowCard}
+                  onChange={(e) => updatePlayer(globalIndex, { yellowCard: e.target.checked })}
+                  className="sr-only"
+                />
+                <span className={`text-2xl ${soccerPlayer.yellowCard ? '' : 'opacity-30'}`}>🟨</span>
+              </label>
+            </div>
+            {/* Red Card */}
+            <div className="flex flex-col items-center">
+              <span className="text-xs text-muted-foreground mb-1">Red</span>
+              <label className="flex items-center justify-center cursor-pointer h-8">
+                <input
+                  type="checkbox"
+                  checked={soccerPlayer.redCard}
+                  onChange={(e) => updatePlayer(globalIndex, { redCard: e.target.checked })}
+                  className="sr-only"
+                />
+                <span className={`text-2xl ${soccerPlayer.redCard ? '' : 'opacity-30'}`}>🟥</span>
+              </label>
+            </div>
+            {/* Clean Sheet */}
+            <div className="flex flex-col items-center">
+              <span className="text-xs text-muted-foreground mb-1">Clean</span>
+              <label className="flex items-center justify-center cursor-pointer h-8">
+                <input
+                  type="checkbox"
+                  checked={soccerPlayer.cleanSheet}
+                  onChange={(e) => updatePlayer(globalIndex, { cleanSheet: e.target.checked })}
+                  className="sr-only"
+                />
+                <span className={`text-2xl ${soccerPlayer.cleanSheet ? '' : 'opacity-30'}`}>🧤</span>
+              </label>
+            </div>
           </div>
         );
 
@@ -264,19 +284,18 @@ export function PlayerStatsEditor({
 
   // Render player list for a team
   const renderTeamPlayers = (teamPlayers: Player[], teamName: string, teamType: 'home' | 'away') => (
-    <div className="space-y-2">
-      <h4 className="font-medium text-sm flex items-center gap-2">
-        <span className={teamType === 'home' ? 'text-blue-400' : 'text-red-400'}>
-          {teamName}
-        </span>
+    <div className="space-y-3">
+      <h4 className="font-medium text-sm flex items-center gap-2 pb-2 border-b border-border">
+        <span className={`w-3 h-3 rounded-full ${teamType === 'home' ? 'bg-blue-400' : 'bg-red-400'}`} />
+        <span>{teamName}</span>
         {teamPlayers.length > 0 && (
-          <span className="text-muted-foreground">({teamPlayers.length})</span>
+          <span className="text-muted-foreground">({teamPlayers.length} players)</span>
         )}
       </h4>
       {teamPlayers.length === 0 ? (
-        <p className="text-sm text-muted-foreground italic">No players tracked yet</p>
+        <p className="text-sm text-muted-foreground italic py-4 text-center">No players tracked yet</p>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {teamPlayers.map((player, idx) => {
             const globalIndex = players.findIndex(
               (p) => (p.id && p.id === (player as Player & { id?: number }).id) ||
@@ -285,25 +304,28 @@ export function PlayerStatsEditor({
             return (
               <div
                 key={(player as Player & { id?: number }).id || (player as Player & { tempId?: string }).tempId || idx}
-                className="p-3 rounded-lg bg-secondary/30 border border-border"
+                className="p-4 rounded-lg bg-secondary/30 border border-border"
               >
-                <div className="flex items-center justify-between gap-2">
+                {/* Player Name Row */}
+                <div className="flex items-center justify-between gap-3 mb-3">
                   <Input
                     type="text"
                     value={player.name}
                     onChange={(e) => updatePlayer(globalIndex, { name: e.target.value })}
-                    className="h-8 text-sm flex-1 max-w-[180px]"
+                    className="h-9 text-sm font-medium flex-1"
                     placeholder="Player name"
                   />
-                  {renderStatInputs(player, idx)}
                   <button
                     type="button"
                     onClick={() => removePlayer(globalIndex)}
-                    className="p-1 hover:bg-destructive/20 rounded text-destructive flex-shrink-0"
+                    className="p-2 hover:bg-destructive/20 rounded text-destructive flex-shrink-0"
+                    title="Remove player"
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
+                {/* Stats Row */}
+                {renderStatInputs(player, idx)}
               </div>
             );
           })}
@@ -374,8 +396,8 @@ export function PlayerStatsEditor({
             </div>
           </div>
 
-          {/* Players by Team */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Players by Team - Full width for better display */}
+          <div className="space-y-6">
             {renderTeamPlayers(homePlayers, homeTeamName || 'Home Team', 'home')}
             {renderTeamPlayers(awayPlayers, awayTeamName || 'Away Team', 'away')}
           </div>

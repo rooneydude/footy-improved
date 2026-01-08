@@ -23,8 +23,8 @@ import { TeamBadge } from '@/components/shared/TeamBadge';
 const soccerSchema = z.object({
   date: z.string().min(1, 'Date is required'),
   venueName: z.string().min(1, 'Venue name is required'),
-  venueCity: z.string().min(1, 'City is required'),
-  venueCountry: z.string().min(1, 'Country is required'),
+  venueCity: z.string().optional(), // Optional - API doesn't always provide this
+  venueCountry: z.string().optional(), // Optional - API doesn't always provide this
   homeTeam: z.string().min(1, 'Home team is required'),
   awayTeam: z.string().min(1, 'Away team is required'),
   homeScore: z.coerce.number().min(0),
@@ -272,16 +272,16 @@ export default function SoccerFormPage() {
           {/* Venue */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Venue</label>
+              <label className="block text-sm font-medium mb-2">Venue *</label>
               <Input {...register('venueName')} placeholder="Stadium name" error={errors.venueName?.message} />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">City</label>
-              <Input {...register('venueCity')} placeholder="City" error={errors.venueCity?.message} />
+              <label className="block text-sm font-medium mb-2">City <span className="text-muted-foreground text-xs">(optional)</span></label>
+              <Input {...register('venueCity')} placeholder="City" />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Country</label>
-              <Input {...register('venueCountry')} placeholder="Country" error={errors.venueCountry?.message} />
+              <label className="block text-sm font-medium mb-2">Country <span className="text-muted-foreground text-xs">(optional)</span></label>
+              <Input {...register('venueCountry')} placeholder="Country" />
             </div>
           </div>
 
