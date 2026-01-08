@@ -12,8 +12,8 @@ import { z } from 'zod';
 const soccerEventSchema = z.object({
   date: z.string().transform((s) => new Date(s)),
   venueName: z.string().min(1, 'Venue name is required'),
-  venueCity: z.string().min(1, 'City is required'),
-  venueCountry: z.string().min(1, 'Country is required'),
+  venueCity: z.string().optional().default(''),
+  venueCountry: z.string().optional().default(''),
   homeTeam: z.string().min(1, 'Home team is required'),
   awayTeam: z.string().min(1, 'Away team is required'),
   homeScore: z.number().min(0).default(0),
@@ -66,8 +66,8 @@ export async function POST(request: NextRequest) {
       let venue = await tx.venue.findFirst({
         where: {
           name: validated.venueName,
-          city: validated.venueCity,
-          country: validated.venueCountry,
+          ...(validated.venueCity && { city: validated.venueCity }),
+          ...(validated.venueCountry && { country: validated.venueCountry }),
         },
       });
 
@@ -75,8 +75,8 @@ export async function POST(request: NextRequest) {
         venue = await tx.venue.create({
           data: {
             name: validated.venueName,
-            city: validated.venueCity,
-            country: validated.venueCountry,
+            city: validated.venueCity || 'Unknown',
+            country: validated.venueCountry || 'Unknown',
             type: 'STADIUM',
           },
         });
