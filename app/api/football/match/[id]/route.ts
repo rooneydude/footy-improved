@@ -41,23 +41,21 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     let matchDetails: FootballMatchDetails | ApiFootballMatchDetails;
     let dataSource = 'football-data.org';
 
-    // Fetch from appropriate source
-    if (source === 'extended' && isApiFootballConfigured()) {
-      matchDetails = await getExtendedMatchDetails(matchId);
-      dataSource = 'api-football';
-    } else {
-      // Try primary source first, fall back to extended if configured
+    // Prefer API-Football for match details as it provides goal scorers on free tier
+    // Football-Data.org free tier doesn't include goal/booking events
+    if (isApiFootballConfigured()) {
       try {
+        matchDetails = await getExtendedMatchDetails(matchId);
+        dataSource = 'api-football';
+      } catch (apiFootballError) {
+        console.warn('API-Football failed, trying Football-Data.org:', apiFootballError);
         matchDetails = await getMatchDetails(matchId);
-      } catch (primaryError) {
-        if (isApiFootballConfigured()) {
-          console.warn('Primary source failed, trying extended:', primaryError);
-          matchDetails = await getExtendedMatchDetails(matchId);
-          dataSource = 'api-football';
-        } else {
-          throw primaryError;
-        }
+        dataSource = 'football-data.org';
       }
+    } else {
+      // Fall back to Football-Data.org (note: free tier doesn't include goal scorers)
+      matchDetails = await getMatchDetails(matchId);
+      dataSource = 'football-data.org';
     }
 
     // Log what data we received from the API
@@ -203,6 +201,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     console.log('Final players to return:', players.length, players);
 
+    // If no players and using football-data.org, explain why
+    const noPlayersReason = players.length === 0 && dataSource === 'football-data.org'
+      ? 'Football-Data.org free tier does not include goal scorer data. Add players manually or configure API_FOOTBALL_KEY for auto-loading.'
+      : undefined;
+
     return NextResponse.json({
       success: true,
       data: {
@@ -223,9 +226,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         bookings: matchDetails.bookings || [],
         // Include team statistics if available (API-Football provides these)
         statistics: 'statistics' in matchDetails ? matchDetails.statistics : undefined,
+        // Explain if no players found
+        noPlayersReason,
       },
       meta: {
         source: dataSource,
+        apiFootballConfigured: isApiFootballConfigured(),
       },
     });
   } catch (error) {

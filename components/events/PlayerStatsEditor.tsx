@@ -293,7 +293,9 @@ export function PlayerStatsEditor({
         )}
       </h4>
       {teamPlayers.length === 0 ? (
-        <p className="text-sm text-muted-foreground italic py-4 text-center">No players tracked yet</p>
+        <p className="text-sm text-muted-foreground italic py-4 text-center">
+          No players tracked yet - use "Track a Player" above to add goal scorers, assisters, etc.
+        </p>
       ) : (
         <div className="space-y-3">
           {teamPlayers.map((player, idx) => {
