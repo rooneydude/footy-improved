@@ -1,11 +1,13 @@
 // Football Match Details API - Fetch lineups, goals, cards
 // 🔍 API Monitor Agent: Returns detailed match data with player stats
 // ✅ Code Quality Agent: Proper error handling, type safety
+// 📚 Library Research Agent: Supports both football-data.org and API-Football
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { getMatchDetails, processMatchToAppearances } from '@/lib/api/football-data';
+import { getMatchDetails, processMatchToAppearances, FootballMatchDetails } from '@/lib/api/football-data';
+import { getExtendedMatchDetails, isApiFootballConfigured, ApiFootballMatchDetails } from '@/lib/api/api-football';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -24,6 +26,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
     const matchId = parseInt(id, 10);
+    
+    // Check for source parameter (default to primary/football-data.org)
+    const searchParams = request.nextUrl.searchParams;
+    const source = searchParams.get('source') || 'primary';
 
     if (isNaN(matchId)) {
       return NextResponse.json(
@@ -32,16 +38,47 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Fetch match details from Football-Data.org
-    const matchDetails = await getMatchDetails(matchId);
+    let matchDetails: FootballMatchDetails | ApiFootballMatchDetails;
+    let dataSource = 'football-data.org';
+
+    // Fetch from appropriate source
+    if (source === 'extended' && isApiFootballConfigured()) {
+      matchDetails = await getExtendedMatchDetails(matchId);
+      dataSource = 'api-football';
+    } else {
+      // Try primary source first, fall back to extended if configured
+      try {
+        matchDetails = await getMatchDetails(matchId);
+      } catch (primaryError) {
+        if (isApiFootballConfigured()) {
+          console.warn('Primary source failed, trying extended:', primaryError);
+          matchDetails = await getExtendedMatchDetails(matchId);
+          dataSource = 'api-football';
+        } else {
+          throw primaryError;
+        }
+      }
+    }
 
     // Process into player appearances
     const { homeAppearances, awayAppearances } = processMatchToAppearances(matchDetails);
 
-    // Combine all players with team designation
+    // Combine all players with team designation (KEY STATS ONLY: Goals & Assists)
     const players = [
-      ...homeAppearances.map((p) => ({ ...p, team: 'home' as const })),
-      ...awayAppearances.map((p) => ({ ...p, team: 'away' as const })),
+      ...homeAppearances.map((p) => ({
+        playerId: p.playerId,
+        playerName: p.playerName,
+        team: 'home' as const,
+        goals: p.goals,
+        assists: p.assists,
+      })),
+      ...awayAppearances.map((p) => ({
+        playerId: p.playerId,
+        playerName: p.playerName,
+        team: 'away' as const,
+        goals: p.goals,
+        assists: p.assists,
+      })),
     ];
 
     return NextResponse.json({
@@ -62,6 +99,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         // Return raw goal and booking data for reference
         goals: matchDetails.goals || [],
         bookings: matchDetails.bookings || [],
+        // Include team statistics if available (API-Football provides these)
+        statistics: 'statistics' in matchDetails ? matchDetails.statistics : undefined,
+      },
+      meta: {
+        source: dataSource,
       },
     });
   } catch (error) {

@@ -41,31 +41,19 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     // Process stats into player appearances (pass home team ID for proper sorting)
     const { homeStats, awayStats } = processGameStats(gameStats, gameDetails.home_team.id);
 
-    // Combine all players with team designation
+    // Combine all players with team designation (KEY STATS ONLY: Points)
     const players = [
       ...homeStats.map((p) => ({
         playerId: p.playerId,
         playerName: p.playerName,
         team: 'home' as const,
         points: p.points,
-        rebounds: p.rebounds,
-        assists: p.assists,
-        steals: p.steals,
-        blocks: p.blocks,
-        turnovers: p.turnovers,
-        minutes: p.minutes,
       })),
       ...awayStats.map((p) => ({
         playerId: p.playerId,
         playerName: p.playerName,
         team: 'away' as const,
         points: p.points,
-        rebounds: p.rebounds,
-        assists: p.assists,
-        steals: p.steals,
-        blocks: p.blocks,
-        turnovers: p.turnovers,
-        minutes: p.minutes,
       })),
     ];
 

@@ -41,33 +41,21 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     // Process box score into player appearances
     const { homeStats, awayStats } = processBoxScore(boxScore);
 
-    // Combine all players with team designation
+    // Combine all players with team designation (KEY STATS ONLY: HR & RBI)
     const players = [
       ...homeStats.map((p) => ({
         playerId: p.playerId,
         playerName: p.playerName,
         team: 'home' as const,
-        position: p.position,
-        hits: p.hits,
         homeRuns: p.homeRuns,
         rbis: p.rbis,
-        runs: p.runs,
-        atBats: p.atBats,
-        strikeOuts: p.strikeOuts,
-        walks: p.walks,
       })),
       ...awayStats.map((p) => ({
         playerId: p.playerId,
         playerName: p.playerName,
         team: 'away' as const,
-        position: p.position,
-        hits: p.hits,
         homeRuns: p.homeRuns,
         rbis: p.rbis,
-        runs: p.runs,
-        atBats: p.atBats,
-        strikeOuts: p.strikeOuts,
-        walks: p.walks,
       })),
     ];
 
