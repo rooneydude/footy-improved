@@ -60,8 +60,27 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       }
     }
 
+    // Log what data we received from the API
+    console.log('Match details received:', {
+      id: matchDetails.id,
+      hasGoals: !!matchDetails.goals,
+      goalsCount: matchDetails.goals?.length || 0,
+      hasBookings: !!matchDetails.bookings,
+      bookingsCount: matchDetails.bookings?.length || 0,
+      hasLineups: !!matchDetails.lineups,
+      rawGoals: matchDetails.goals,
+      rawBookings: matchDetails.bookings,
+    });
+
     // Process into player appearances
     const { homeAppearances, awayAppearances } = processMatchToAppearances(matchDetails);
+    
+    console.log('Processed appearances:', {
+      homeCount: homeAppearances.length,
+      awayCount: awayAppearances.length,
+      homeAppearances,
+      awayAppearances,
+    });
 
     // Filter to only players with meaningful stats (scored, assisted, got carded, or kept clean sheet)
     const hasStats = (p: typeof homeAppearances[0]) => 
@@ -179,7 +198,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       }
 
       players = Array.from(playerMap.values());
+      console.log('Fallback players created:', players.length);
     }
+
+    console.log('Final players to return:', players.length, players);
 
     return NextResponse.json({
       success: true,
