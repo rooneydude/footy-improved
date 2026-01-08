@@ -2,8 +2,11 @@
 // 📚 Library Research Agent: Using official MLB Stats API (free, no key required)
 // API Docs: https://statsapi.mlb.com/docs
 // ✅ Code Quality Agent: Proper error handling, type safety
+// 🔍 Search Agent: Smart team name matching to prevent search overlap
 
 const API_BASE = 'https://statsapi.mlb.com/api/v1';
+
+import { filterBySearchRelevance, getBestMatchScore } from '@/lib/utils/search';
 
 // Types for API responses
 export interface MLBGame {
@@ -148,14 +151,33 @@ export async function searchGames(
     games.push(...(date.games || []));
   }
   
-  // Filter by team name if provided
+  // Filter by team name if provided with smart matching
+  // This prevents overlap like "New York" matching both "Yankees" and "Mets"
   if (teamName) {
-    const lowerQuery = teamName.toLowerCase();
-    games = games.filter(
-      (game) =>
-        game.teams.home.team.name.toLowerCase().includes(lowerQuery) ||
-        game.teams.away.team.name.toLowerCase().includes(lowerQuery)
+    games = filterBySearchRelevance(
+      games,
+      teamName,
+      (game) => [
+        game.teams.home.team.name,
+        game.teams.away.team.name,
+      ],
+      20 // Minimum score threshold
     );
+    
+    // Sort by best match score (most relevant first)
+    games.sort((a, b) => {
+      const scoreA = getBestMatchScore(
+        teamName,
+        a.teams.home.team.name,
+        a.teams.away.team.name
+      );
+      const scoreB = getBestMatchScore(
+        teamName,
+        b.teams.home.team.name,
+        b.teams.away.team.name
+      );
+      return scoreB - scoreA;
+    });
   }
   
   return games;

@@ -2,8 +2,11 @@
 // 📚 Library Research Agent: Using balldontlie.io REST API
 // API Docs: https://www.balldontlie.io/home.html#introduction
 // ✅ Code Quality Agent: Proper error handling, type safety
+// 🔍 Search Agent: Smart team name matching to prevent search overlap
 
 const API_BASE = 'https://api.balldontlie.io/v1';
+
+import { filterBySearchRelevance, getBestMatchScore } from '@/lib/utils/search';
 
 // Types for API responses
 export interface NBAGame {
@@ -129,18 +132,45 @@ export async function searchGames(
   
   let games = data.data;
   
-  // Filter by team name if provided
+  // Filter by team name if provided with smart matching
+  // This prevents overlap like "Los Angeles" matching both "Lakers" and "Clippers"
   if (teamName) {
-    const lowerQuery = teamName.toLowerCase();
-    games = games.filter(
-      (game) =>
-        game.home_team.name.toLowerCase().includes(lowerQuery) ||
-        game.home_team.city.toLowerCase().includes(lowerQuery) ||
-        game.home_team.full_name.toLowerCase().includes(lowerQuery) ||
-        game.visitor_team.name.toLowerCase().includes(lowerQuery) ||
-        game.visitor_team.city.toLowerCase().includes(lowerQuery) ||
-        game.visitor_team.full_name.toLowerCase().includes(lowerQuery)
+    games = filterBySearchRelevance(
+      games,
+      teamName,
+      (game) => [
+        game.home_team.name,
+        game.home_team.city,
+        game.home_team.full_name,
+        game.visitor_team.name,
+        game.visitor_team.city,
+        game.visitor_team.full_name,
+      ],
+      20 // Minimum score threshold
     );
+    
+    // Sort by best match score (most relevant first)
+    games.sort((a, b) => {
+      const scoreA = getBestMatchScore(
+        teamName,
+        a.home_team.name,
+        a.home_team.city,
+        a.home_team.full_name,
+        a.visitor_team.name,
+        a.visitor_team.city,
+        a.visitor_team.full_name
+      );
+      const scoreB = getBestMatchScore(
+        teamName,
+        b.home_team.name,
+        b.home_team.city,
+        b.home_team.full_name,
+        b.visitor_team.name,
+        b.visitor_team.city,
+        b.visitor_team.full_name
+      );
+      return scoreB - scoreA;
+    });
   }
   
   return games;

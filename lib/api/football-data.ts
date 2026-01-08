@@ -2,15 +2,18 @@
 // 📚 Library Research Agent: Using official Football-Data.org REST API
 // API Docs: https://www.football-data.org/documentation/api
 // ✅ Code Quality Agent: Proper error handling, rate limiting, type safety
+// 🔍 Search Agent: Smart team name matching to prevent search overlap
 
 const API_BASE = 'https://api.football-data.org/v4';
+
+import { filterBySearchRelevance, getBestMatchScore } from '@/lib/utils/search';
 
 // Types for API responses
 export interface FootballMatch {
   id: number;
   utcDate: string;
   status: string;
-  matchday: number;
+  matchday: number | null;
   competition: {
     id: number;
     name: string;
@@ -112,9 +115,10 @@ export async function searchMatches(
 ): Promise<FootballMatch[]> {
   // Search across major competitions
   // PL=Premier League, PD=La Liga, BL1=Bundesliga, SA=Serie A, FL1=Ligue 1
-  // CL=Champions League, EL=Europa League, EC=European Championship
+  // CL=Champions League, EC=European Championship
   // BSA=Brazilian Serie A, DED=Eredivisie, PPL=Primeira Liga, WC=World Cup
-  const competitions = ['PL', 'PD', 'BL1', 'SA', 'FL1', 'CL', 'EL', 'EC', 'BSA', 'DED', 'PPL', 'WC'];
+  // Note: EL (Europa League) excluded - requires higher tier API access
+  const competitions = ['PL', 'PD', 'BL1', 'SA', 'FL1', 'CL', 'EC', 'BSA', 'DED', 'PPL', 'WC'];
   const allMatches: FootballMatch[] = [];
 
   const params = new URLSearchParams();
@@ -133,15 +137,46 @@ export async function searchMatches(
     }
   }
 
-  // Filter by query (team name match)
-  const lowerQuery = query.toLowerCase();
-  return allMatches.filter(
-    (match) =>
-      match.homeTeam.name.toLowerCase().includes(lowerQuery) ||
-      match.awayTeam.name.toLowerCase().includes(lowerQuery) ||
-      match.homeTeam.shortName?.toLowerCase().includes(lowerQuery) ||
-      match.awayTeam.shortName?.toLowerCase().includes(lowerQuery)
+  // Filter by query (team name match) with smart matching
+  // This prevents overlap like "Manchester" matching both "Manchester United" and "Manchester City"
+  if (!query) return allMatches;
+  
+  // Filter out invalid matches first
+  const validMatches = allMatches.filter(
+    (match) => match && match.homeTeam && match.awayTeam
   );
+  
+  // Use smart search filtering with relevance scoring
+  const filtered = filterBySearchRelevance(
+    validMatches,
+    query,
+    (match) => [
+      match.homeTeam.name || '',
+      match.awayTeam.name || '',
+      match.homeTeam.shortName || '',
+      match.awayTeam.shortName || '',
+    ],
+    20 // Minimum score threshold
+  );
+  
+  // Sort by best match score (most relevant first)
+  return filtered.sort((a, b) => {
+    const scoreA = getBestMatchScore(
+      query,
+      a.homeTeam.name,
+      a.awayTeam.name,
+      a.homeTeam.shortName,
+      a.awayTeam.shortName
+    );
+    const scoreB = getBestMatchScore(
+      query,
+      b.homeTeam.name,
+      b.awayTeam.name,
+      b.homeTeam.shortName,
+      b.awayTeam.shortName
+    );
+    return scoreB - scoreA;
+  });
 }
 
 // Get match details by ID
