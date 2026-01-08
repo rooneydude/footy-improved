@@ -37,8 +37,20 @@ async function getEventLogos(
             where: { name: event.soccerMatch.awayTeam, sport: 'SOCCER' },
           }),
         ]);
-        logos.home = homeTeam?.logoUrl || null;
-        logos.away = awayTeam?.logoUrl || null;
+        
+        // Use logoUrl if available, otherwise generate from externalId
+        if (homeTeam?.logoUrl) {
+          logos.home = homeTeam.logoUrl;
+        } else if (homeTeam?.externalId) {
+          // Generate Football-Data.org crest URL from external ID
+          logos.home = `https://crests.football-data.org/${homeTeam.externalId}.png`;
+        }
+        
+        if (awayTeam?.logoUrl) {
+          logos.away = awayTeam.logoUrl;
+        } else if (awayTeam?.externalId) {
+          logos.away = `https://crests.football-data.org/${awayTeam.externalId}.png`;
+        }
       }
       break;
     case 'BASKETBALL':

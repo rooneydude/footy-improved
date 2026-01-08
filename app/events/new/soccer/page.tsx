@@ -132,6 +132,11 @@ export default function SoccerFormPage() {
     try {
       const payload = {
         ...data,
+        // Include team logo data for Team entries
+        homeTeamId: teamCrests.homeId,
+        awayTeamId: teamCrests.awayId,
+        homeTeamCrest: teamCrests.home,
+        awayTeamCrest: teamCrests.away,
         appearances: players.map((p) => ({
           playerName: p.name,
           externalId: p.id,

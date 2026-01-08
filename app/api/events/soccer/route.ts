@@ -20,6 +20,11 @@ const soccerEventSchema = z.object({
   awayScore: z.number().min(0).default(0),
   competition: z.string().optional(),
   externalMatchId: z.union([z.string(), z.number()]).transform(v => v?.toString()).optional(),
+  // Team logo data from API search
+  homeTeamId: z.union([z.string(), z.number()]).transform(v => v?.toString()).optional(),
+  awayTeamId: z.union([z.string(), z.number()]).transform(v => v?.toString()).optional(),
+  homeTeamCrest: z.string().url().optional().nullable(),
+  awayTeamCrest: z.string().url().optional().nullable(),
   notes: z.string().optional(),
   rating: z.number().min(1).max(5).optional(),
   companions: z.array(z.string()).default([]),
@@ -80,6 +85,62 @@ export async function POST(request: NextRequest) {
             type: 'STADIUM',
           },
         });
+      }
+
+      // Create or update home team with logo
+      if (validated.homeTeam) {
+        const existingHomeTeam = await tx.team.findFirst({
+          where: { name: validated.homeTeam, sport: 'SOCCER' },
+        });
+        
+        if (!existingHomeTeam) {
+          await tx.team.create({
+            data: {
+              name: validated.homeTeam,
+              sport: 'SOCCER',
+              externalId: validated.homeTeamId,
+              logoUrl: validated.homeTeamCrest,
+              league: validated.competition,
+            },
+          });
+        } else if (validated.homeTeamCrest && !existingHomeTeam.logoUrl) {
+          // Update existing team with logo if it doesn't have one
+          await tx.team.update({
+            where: { id: existingHomeTeam.id },
+            data: { 
+              logoUrl: validated.homeTeamCrest,
+              externalId: validated.homeTeamId || existingHomeTeam.externalId,
+            },
+          });
+        }
+      }
+
+      // Create or update away team with logo
+      if (validated.awayTeam) {
+        const existingAwayTeam = await tx.team.findFirst({
+          where: { name: validated.awayTeam, sport: 'SOCCER' },
+        });
+        
+        if (!existingAwayTeam) {
+          await tx.team.create({
+            data: {
+              name: validated.awayTeam,
+              sport: 'SOCCER',
+              externalId: validated.awayTeamId,
+              logoUrl: validated.awayTeamCrest,
+              league: validated.competition,
+            },
+          });
+        } else if (validated.awayTeamCrest && !existingAwayTeam.logoUrl) {
+          // Update existing team with logo if it doesn't have one
+          await tx.team.update({
+            where: { id: existingAwayTeam.id },
+            data: { 
+              logoUrl: validated.awayTeamCrest,
+              externalId: validated.awayTeamId || existingAwayTeam.externalId,
+            },
+          });
+        }
       }
 
       // Create event
