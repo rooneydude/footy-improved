@@ -189,7 +189,13 @@ export async function searchMatches(
 
 // Get match details by ID
 export async function getMatchDetails(matchId: number): Promise<FootballMatchDetails> {
-  return fetchFromApi<FootballMatchDetails>(`/matches/${matchId}`);
+  const rawResponse = await fetchFromApi<Record<string, unknown>>(`/matches/${matchId}`);
+  
+  // Log the full raw response to see the actual structure
+  console.log('Raw Football-Data.org response keys:', Object.keys(rawResponse));
+  console.log('Raw Football-Data.org response:', JSON.stringify(rawResponse, null, 2).slice(0, 2000));
+  
+  return rawResponse as unknown as FootballMatchDetails;
 }
 
 // Get matches for a specific team
