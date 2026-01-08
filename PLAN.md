@@ -629,7 +629,9 @@ GITHUB_CLIENT_ID=""
 GITHUB_CLIENT_SECRET=""
 
 # External APIs
-FOOTBALL_DATA_API_KEY=""
+FOOTBALL_DATA_API_KEY=""      # Football-Data.org - Premier League, La Liga, Bundesliga, etc.
+API_FOOTBALL_KEY=""           # API-Football (direct) - Europa League, Copa America, Gold Cup, domestic cups
+RAPIDAPI_KEY=""               # Alternative: API-Football via RapidAPI (use if you signed up through RapidAPI)
 BALLDONTLIE_API_KEY=""
 SETLIST_FM_API_KEY=""
 

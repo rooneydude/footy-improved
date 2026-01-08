@@ -55,19 +55,28 @@ export async function GET(request: NextRequest) {
     }
 
     // Search extended source (API-Football) - Europa League, Copa America, cups, etc.
-    if ((source === 'extended' || source === 'all' || !source) && isApiFootballConfigured()) {
+    const apiFootballConfigured = isApiFootballConfigured();
+    console.log(`[Football Search] API-Football configured: ${apiFootballConfigured}`);
+    console.log(`[Football Search] Source param: ${source || 'all (default)'}`);
+    
+    if ((source === 'extended' || source === 'all' || !source) && apiFootballConfigured) {
       try {
+        console.log(`[Football Search] Searching API-Football for: "${query}" (${dateFrom} to ${dateTo})`);
         const extendedMatches = await searchExtendedMatches(
           query, 
           dateFrom, 
           dateTo,
           competitions
         );
+        console.log(`[Football Search] API-Football returned ${extendedMatches.length} matches`);
         allMatches.push(...extendedMatches);
         sources.push('api-football');
       } catch (error) {
+        console.error(`[Football Search] API-Football error:`, error);
         errors.push(`Extended: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
+    } else if (!apiFootballConfigured) {
+      console.log('[Football Search] Skipping API-Football - not configured');
     }
 
     // Deduplicate matches by comparing teams and date

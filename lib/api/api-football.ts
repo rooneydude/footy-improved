@@ -1,11 +1,16 @@
-// API-Football Client (via RapidAPI)
+// API-Football Client
 // 📚 Library Research Agent: Using API-Football for extended competition coverage
 // API Docs: https://www.api-football.com/documentation-v3
 // Covers: Europa League, Copa America, MLS, domestic cups, and 1200+ leagues
 // ✅ Code Quality Agent: Proper error handling, rate limiting, type safety
 // 🔍 Search Agent: Smart team name matching to prevent search overlap
+//
+// AUTHENTICATION:
+// - Direct API-Football (api-football.com): Set API_FOOTBALL_KEY, uses x-apisports-key header
+// - RapidAPI: Set RAPIDAPI_KEY, uses x-rapidapi-key + x-rapidapi-host headers
 
-const API_BASE = 'https://v3.football.api-sports.io';
+const API_BASE_DIRECT = 'https://v3.football.api-sports.io';
+const API_BASE_RAPIDAPI = 'https://v3.football.api-sports.io';
 
 import { filterBySearchRelevance, getBestMatchScore } from '@/lib/utils/search';
 
@@ -129,26 +134,44 @@ interface ApiFootballLineup {
 }
 
 // Helper to fetch from API-Football with error handling
+// Supports both direct API-Football and RapidAPI authentication
 async function fetchFromApiFootball<T>(endpoint: string): Promise<T> {
-  const apiKey = process.env.API_FOOTBALL_KEY;
+  const directApiKey = process.env.API_FOOTBALL_KEY;
+  const rapidApiKey = process.env.RAPIDAPI_KEY;
   
-  if (!apiKey) {
-    throw new Error('API_FOOTBALL_KEY not configured');
+  if (!directApiKey && !rapidApiKey) {
+    throw new Error('API_FOOTBALL_KEY or RAPIDAPI_KEY not configured');
   }
 
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    headers: {
-      'x-apisports-key': apiKey,
-    },
+  // Determine which authentication to use
+  const useRapidApi = !directApiKey && rapidApiKey;
+  const apiKey = directApiKey || rapidApiKey;
+  const apiBase = useRapidApi ? API_BASE_RAPIDAPI : API_BASE_DIRECT;
+  
+  const headers: Record<string, string> = useRapidApi
+    ? {
+        'x-rapidapi-key': apiKey!,
+        'x-rapidapi-host': 'v3.football.api-sports.io',
+      }
+    : {
+        'x-apisports-key': apiKey!,
+      };
+
+  console.log(`[API-Football] Fetching: ${apiBase}${endpoint}`);
+  console.log(`[API-Football] Using ${useRapidApi ? 'RapidAPI' : 'Direct API'} authentication`);
+
+  const response = await fetch(`${apiBase}${endpoint}`, {
+    headers,
     next: { revalidate: 60 }, // Cache for 60 seconds
   });
 
   if (!response.ok) {
+    console.error(`[API-Football] HTTP Error: ${response.status} ${response.statusText}`);
     if (response.status === 429) {
       throw new Error('Rate limit exceeded. Please try again later.');
     }
     if (response.status === 403 || response.status === 401) {
-      throw new Error('API key invalid or unauthorized.');
+      throw new Error(`API key invalid or unauthorized. Using ${useRapidApi ? 'RapidAPI' : 'Direct API'} auth. Check your ${useRapidApi ? 'RAPIDAPI_KEY' : 'API_FOOTBALL_KEY'}.`);
     }
     throw new Error(`API-Football error: ${response.status}`);
   }
@@ -157,9 +180,11 @@ async function fetchFromApiFootball<T>(endpoint: string): Promise<T> {
   
   // API-Football wraps responses in { response: [...] }
   if (data.errors && Object.keys(data.errors).length > 0) {
+    console.error(`[API-Football] API Error:`, data.errors);
     throw new Error(`API-Football error: ${JSON.stringify(data.errors)}`);
   }
 
+  console.log(`[API-Football] Success: Got ${data.response?.length || 0} results`);
   return data;
 }
 
@@ -294,6 +319,35 @@ function getCompetitionCode(leagueId: number): string {
   return `L${leagueId}`;
 }
 
+// Competitions that use calendar year seasons (Jan-Dec)
+// Most American leagues use calendar year
+const CALENDAR_YEAR_COMPETITIONS = ['MLS', 'LMX'];
+
+// Get the correct season for a competition based on the search date
+// European competitions: season=2023 means Aug 2023 - May 2024
+// American competitions: season=2024 means Jan 2024 - Dec 2024
+function getSeasonForCompetition(compCode: string, dateFrom?: string): number {
+  const searchDate = dateFrom ? new Date(dateFrom) : new Date();
+  const searchYear = searchDate.getFullYear();
+  const searchMonth = searchDate.getMonth() + 1; // 1-12
+  
+  // For calendar year competitions (MLS, Liga MX), use the year directly
+  if (CALENDAR_YEAR_COMPETITIONS.includes(compCode)) {
+    // Cap at 2024 for free tier API limits
+    return Math.min(searchYear, 2024);
+  }
+  
+  // For European/cross-year competitions:
+  // - If searching Jan-July, the season started the previous year
+  // - If searching Aug-Dec, the season started this year
+  // Example: May 2024 → season 2023 (2023-24 season)
+  //          October 2024 → season 2024 (2024-25 season)
+  const season = searchMonth <= 7 ? searchYear - 1 : searchYear;
+  
+  // Cap at 2024 for free tier API limits
+  return Math.min(season, 2024);
+}
+
 // Search matches in extended competitions
 export async function searchExtendedMatches(
   query: string,
@@ -308,13 +362,12 @@ export async function searchExtendedMatches(
   const defaultComps = ['EL', 'CA', 'FAC', 'MLS', 'CDR', 'DFB'];
   const competitionsToSearch = competitions || defaultComps;
   
-  // Use 2024 season (API-Football free plan: 2022-2024)
-  const currentYear = new Date().getFullYear();
-  const season = currentYear > 2024 ? 2024 : currentYear;
-  
   for (const compCode of competitionsToSearch) {
     const leagueId = EXTENDED_COMPETITIONS[compCode];
     if (!leagueId) continue;
+
+    // Get the correct season for this competition type
+    const season = getSeasonForCompetition(compCode, dateFrom);
 
     try {
       let endpoint = `/fixtures?league=${leagueId}&season=${season}`;
@@ -498,8 +551,12 @@ export function getExtendedCompetitions(): Array<{ code: string; id: number; nam
   }));
 }
 
-// Check if API-Football is configured
+// Check if API-Football is configured (supports both direct and RapidAPI)
 export function isApiFootballConfigured(): boolean {
-  return !!process.env.API_FOOTBALL_KEY;
+  const configured = !!(process.env.API_FOOTBALL_KEY || process.env.RAPIDAPI_KEY);
+  if (!configured) {
+    console.log('[API-Football] Not configured - set API_FOOTBALL_KEY or RAPIDAPI_KEY');
+  }
+  return configured;
 }
 
