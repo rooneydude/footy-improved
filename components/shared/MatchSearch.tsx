@@ -26,6 +26,8 @@ export interface SoccerMatchResult {
   awayScore: number | null;
   competition: string;
   venue: string | null;
+  country?: string; // From area.name or competition area
+  city?: string; // Extracted from homeTeam address if available
   status: string;
 }
 
@@ -179,21 +181,42 @@ export function MatchSearch({ sportType, onMatchSelect, onPlayersLoaded }: Match
 
     switch (sport) {
       case 'soccer':
-        return data.map((match: Record<string, unknown>) => ({
-          id: match.id as number,
-          date: match.utcDate as string,
-          homeTeam: (match.homeTeam as Record<string, unknown>)?.name as string || 'Unknown',
-          awayTeam: (match.awayTeam as Record<string, unknown>)?.name as string || 'Unknown',
-          homeTeamId: (match.homeTeam as Record<string, unknown>)?.id as number | undefined,
-          awayTeamId: (match.awayTeam as Record<string, unknown>)?.id as number | undefined,
-          homeTeamCrest: (match.homeTeam as Record<string, unknown>)?.crest as string | undefined,
-          awayTeamCrest: (match.awayTeam as Record<string, unknown>)?.crest as string | undefined,
-          homeScore: ((match.score as Record<string, unknown>)?.fullTime as Record<string, unknown>)?.home as number | null,
-          awayScore: ((match.score as Record<string, unknown>)?.fullTime as Record<string, unknown>)?.away as number | null,
-          competition: (match.competition as Record<string, unknown>)?.name as string || '',
-          venue: match.venue as string | null,
-          status: match.status as string,
-        }));
+        return data.map((match: Record<string, unknown>) => {
+          // Extract country from area or competition area
+          const area = match.area as Record<string, unknown> | undefined;
+          const competition = match.competition as Record<string, unknown> | undefined;
+          const competitionArea = competition?.area as Record<string, unknown> | undefined;
+          const country = (area?.name || competitionArea?.name) as string | undefined;
+          
+          // Try to extract city from venue name (e.g., "Old Trafford, Manchester" or just use venue)
+          const venue = match.venue as string | null;
+          let city: string | undefined;
+          if (venue) {
+            // Common pattern: "Stadium Name, City" - try to extract city
+            const parts = venue.split(',');
+            if (parts.length > 1) {
+              city = parts[parts.length - 1].trim();
+            }
+          }
+          
+          return {
+            id: match.id as number,
+            date: match.utcDate as string,
+            homeTeam: (match.homeTeam as Record<string, unknown>)?.name as string || 'Unknown',
+            awayTeam: (match.awayTeam as Record<string, unknown>)?.name as string || 'Unknown',
+            homeTeamId: (match.homeTeam as Record<string, unknown>)?.id as number | undefined,
+            awayTeamId: (match.awayTeam as Record<string, unknown>)?.id as number | undefined,
+            homeTeamCrest: (match.homeTeam as Record<string, unknown>)?.crest as string | undefined,
+            awayTeamCrest: (match.awayTeam as Record<string, unknown>)?.crest as string | undefined,
+            homeScore: ((match.score as Record<string, unknown>)?.fullTime as Record<string, unknown>)?.home as number | null,
+            awayScore: ((match.score as Record<string, unknown>)?.fullTime as Record<string, unknown>)?.away as number | null,
+            competition: (competition?.name as string) || '',
+            venue: venue,
+            country: country,
+            city: city,
+            status: match.status as string,
+          };
+        });
       
       case 'basketball':
         return data.map((game: Record<string, unknown>) => ({

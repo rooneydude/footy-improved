@@ -95,7 +95,19 @@ export default function SoccerFormPage() {
     
     // Set venue if available
     if (match.venue) {
-      setValue('venueName', match.venue);
+      // If venue contains comma, split and use first part as venue name
+      const venueParts = match.venue.split(',');
+      setValue('venueName', venueParts[0].trim());
+    }
+    
+    // Set city if available (extracted from venue or API)
+    if (match.city) {
+      setValue('venueCity', match.city);
+    }
+    
+    // Set country if available (from area/competition)
+    if (match.country) {
+      setValue('venueCountry', match.country);
     }
   };
 

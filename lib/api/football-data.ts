@@ -19,12 +19,19 @@ export interface FootballMatch {
     name: string;
     code: string;
   };
+  area?: {
+    id: number;
+    name: string;
+    code: string;
+    flag?: string;
+  };
   homeTeam: {
     id: number;
     name: string;
     shortName: string;
     tla: string;
     crest: string;
+    address?: string; // Contains city info like "Manchester M16 0RA"
   };
   awayTeam: {
     id: number;
@@ -32,6 +39,7 @@ export interface FootballMatch {
     shortName: string;
     tla: string;
     crest: string;
+    address?: string;
   };
   score: {
     winner: string | null;
