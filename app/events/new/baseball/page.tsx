@@ -91,21 +91,15 @@ export default function BaseballFormPage() {
     }
   };
 
-  // Handle players loaded from API
+  // Handle players loaded from API (KEY STATS ONLY: HR & RBI)
   const handlePlayersLoaded = (loadedPlayers: PlayerAppearance[]) => {
     const baseballPlayers = loadedPlayers as BaseballPlayerAppearance[];
     const formattedPlayers: BaseballPlayer[] = baseballPlayers.map((p) => ({
       id: p.playerId,
       name: p.playerName,
       team: p.team,
-      position: p.position,
-      hits: p.hits,
       homeRuns: p.homeRuns,
       rbis: p.rbis,
-      runs: p.runs,
-      atBats: p.atBats,
-      strikeOuts: p.strikeOuts,
-      walks: p.walks,
     }));
     setPlayers(formattedPlayers);
   };
@@ -119,14 +113,8 @@ export default function BaseballFormPage() {
           playerName: p.name,
           externalId: p.id,
           team: p.team,
-          position: p.position,
-          hits: p.hits,
           homeRuns: p.homeRuns,
           rbis: p.rbis,
-          runs: p.runs,
-          atBats: p.atBats,
-          strikeOuts: p.strikeOuts,
-          walks: p.walks,
         })),
       };
 

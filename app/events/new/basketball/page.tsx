@@ -90,7 +90,7 @@ export default function BasketballFormPage() {
     }
   };
 
-  // Handle players loaded from API
+  // Handle players loaded from API (KEY STAT ONLY: Points)
   const handlePlayersLoaded = (loadedPlayers: PlayerAppearance[]) => {
     const basketballPlayers = loadedPlayers as BasketballPlayerAppearance[];
     const formattedPlayers: BasketballPlayer[] = basketballPlayers.map((p) => ({
@@ -98,12 +98,6 @@ export default function BasketballFormPage() {
       name: p.playerName,
       team: p.team,
       points: p.points,
-      rebounds: p.rebounds,
-      assists: p.assists,
-      steals: p.steals,
-      blocks: p.blocks,
-      turnovers: p.turnovers,
-      minutes: p.minutes,
     }));
     setPlayers(formattedPlayers);
   };
@@ -118,12 +112,6 @@ export default function BasketballFormPage() {
           externalId: p.id,
           team: p.team,
           points: p.points,
-          rebounds: p.rebounds,
-          assists: p.assists,
-          steals: p.steals,
-          blocks: p.blocks,
-          turnovers: p.turnovers,
-          minutes: p.minutes,
         })),
       };
 

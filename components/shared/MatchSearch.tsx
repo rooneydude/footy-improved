@@ -57,17 +57,13 @@ export interface BaseballGameResult {
 export type SportType = 'soccer' | 'basketball' | 'baseball';
 export type MatchResult = SoccerMatchResult | BasketballGameResult | BaseballGameResult;
 
-// Player appearance types for each sport
+// Player appearance types for each sport - KEY STATS ONLY
 export interface SoccerPlayerAppearance {
   playerId: number;
   playerName: string;
   team: 'home' | 'away';
   goals: number;
   assists: number;
-  yellowCard: boolean;
-  redCard: boolean;
-  cleanSheet: boolean;
-  minutesPlayed?: number;
 }
 
 export interface BasketballPlayerAppearance {
@@ -75,26 +71,14 @@ export interface BasketballPlayerAppearance {
   playerName: string;
   team: 'home' | 'away';
   points: number;
-  rebounds: number;
-  assists: number;
-  steals: number;
-  blocks: number;
-  turnovers: number;
-  minutes: string;
 }
 
 export interface BaseballPlayerAppearance {
   playerId: number;
   playerName: string;
   team: 'home' | 'away';
-  position: string;
-  hits: number;
   homeRuns: number;
   rbis: number;
-  runs: number;
-  atBats: number;
-  strikeOuts: number;
-  walks: number;
 }
 
 export type PlayerAppearance = SoccerPlayerAppearance | BasketballPlayerAppearance | BaseballPlayerAppearance;
