@@ -332,7 +332,16 @@ function getCompetitionCode(leagueId: number): string {
 
 // Competitions that use calendar year seasons (Jan-Dec)
 // Most American leagues use calendar year
-const CALENDAR_YEAR_COMPETITIONS = ['MLS', 'LMX'];
+// Competitions that use calendar-year seasons (season=2021 means 2021 matches)
+// as opposed to European leagues that use cross-year seasons (season=2023 means Aug 2023 - May 2024)
+const CALENDAR_YEAR_COMPETITIONS = [
+  // Americas leagues
+  'MLS', 'LMX',
+  // International tournaments (played within a single calendar year)
+  'WC', 'EC', 'CA', 'GC', 'AFCON', 'AC',
+  // FIFA club tournaments
+  'CWC', 'USC',
+];
 
 // Get the correct season for a competition based on the search date
 // European competitions: season=2023 means Aug 2023 - May 2024
