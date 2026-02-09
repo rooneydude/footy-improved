@@ -5,7 +5,7 @@
 // ✅ Code Quality Agent: Proper loading states, error handling, type safety
 
 import { useState, useEffect } from 'react';
-import { Search, Calendar, Loader2, ChevronRight, X } from 'lucide-react';
+import { Search, Calendar, Loader2, ChevronRight, X, Globe, Trophy } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -96,10 +96,17 @@ interface MatchSearchProps {
   onPlayersLoaded?: (players: PlayerAppearance[]) => void;
 }
 
+// Competition type filter options for soccer
+type CompetitionFilter = 'club' | 'international' | 'all';
+
+const INTERNATIONAL_COMPS = ['WC', 'EC', 'CA', 'GC', 'AFCON', 'AC'];
+const CLUB_COMPS = ['PL', 'PD', 'BL1', 'SA', 'FL1', 'CL', 'EL', 'ECL', 'FAC', 'EFL', 'CDR', 'DFB', 'CIF', 'CDF', 'MLS', 'LMX', 'CL_CONMEBOL', 'CS', 'CWC', 'USC', 'SPL', 'JPL', 'SL', 'RPL'];
+
 export function MatchSearch({ sportType, onMatchSelect, onPlayersLoaded }: MatchSearchProps) {
   const [query, setQuery] = useState('');
   const [selectedYear, setSelectedYear] = useState<string>('');
   const [selectedMonth, setSelectedMonth] = useState<string>('');
+  const [competitionFilter, setCompetitionFilter] = useState<CompetitionFilter>('club');
   const [results, setResults] = useState<MatchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
@@ -214,8 +221,19 @@ export function MatchSearch({ sportType, onMatchSelect, onPlayersLoaded }: Match
         
         params.append('dateFrom', dateFrom);
         params.append('dateTo', dateTo);
+        
+        // Pass competition filter for soccer searches
+        if (sportType === 'soccer' && competitionFilter !== 'club') {
+          if (competitionFilter === 'international') {
+            params.append('competitions', INTERNATIONAL_COMPS.join(','));
+            params.append('source', 'extended'); // Only search API-Football for international
+          } else if (competitionFilter === 'all') {
+            // Search everything - default behavior searches both APIs
+            params.append('competitions', [...CLUB_COMPS, ...INTERNATIONAL_COMPS].join(','));
+          }
+        }
 
-        console.log(`[MatchSearch] Searching ${sportType}: "${debouncedQuery}" from ${dateFrom} to ${dateTo}`);
+        console.log(`[MatchSearch] Searching ${sportType}: "${debouncedQuery}" from ${dateFrom} to ${dateTo} (filter: ${competitionFilter})`);
 
         const response = await fetch(`${endpoint}?${params}`);
         const data = await response.json();
@@ -238,7 +256,7 @@ export function MatchSearch({ sportType, onMatchSelect, onPlayersLoaded }: Match
     };
 
     searchMatches();
-  }, [debouncedQuery, selectedYear, selectedMonth, sportType]);
+  }, [debouncedQuery, selectedYear, selectedMonth, sportType, competitionFilter]);
 
   // Get search endpoint based on sport type
   const getSearchEndpoint = (sport: SportType): string => {
@@ -459,6 +477,58 @@ export function MatchSearch({ sportType, onMatchSelect, onPlayersLoaded }: Match
                 )}
               </div>
             </div>
+
+            {/* Competition Type Filter (Soccer only) */}
+            {sportType === 'soccer' && (
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  <Globe className="h-4 w-4 inline mr-1" />
+                  Competition Type
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCompetitionFilter('club')}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      competitionFilter === 'club'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary/50 hover:bg-secondary/80 text-muted-foreground'
+                    }`}
+                  >
+                    <Trophy className="h-3.5 w-3.5 inline mr-1" />
+                    Club
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCompetitionFilter('international')}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      competitionFilter === 'international'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary/50 hover:bg-secondary/80 text-muted-foreground'
+                    }`}
+                  >
+                    <Globe className="h-3.5 w-3.5 inline mr-1" />
+                    International
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCompetitionFilter('all')}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      competitionFilter === 'all'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary/50 hover:bg-secondary/80 text-muted-foreground'
+                    }`}
+                  >
+                    All
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {competitionFilter === 'club' && 'Premier League, La Liga, Champions League, MLS, domestic cups...'}
+                  {competitionFilter === 'international' && 'World Cup, Euros, Copa America, Gold Cup, AFCON, Asian Cup'}
+                  {competitionFilter === 'all' && 'All club and international competitions'}
+                </p>
+              </div>
+            )}
 
             {/* Year and Month Selection */}
             <div className="grid grid-cols-2 gap-4">
