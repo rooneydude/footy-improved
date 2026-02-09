@@ -8,15 +8,22 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { normalizeTeamName } from '@/lib/utils/team-names';
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
-    // Auth check - require authenticated user
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
+    // Auth check - require authenticated user or admin secret
+    const body = await request.json().catch(() => ({}));
+    const adminSecret = body?.secret;
+    
+    if (adminSecret === process.env.NEXTAUTH_SECRET) {
+      // Admin access via secret
+    } else {
+      const session = await getServerSession(authOptions);
+      if (!session?.user?.id) {
+        return NextResponse.json(
+          { success: false, error: 'Unauthorized' },
+          { status: 401 }
+        );
+      }
     }
 
     const results = {
