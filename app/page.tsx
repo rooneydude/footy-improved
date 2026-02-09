@@ -45,6 +45,7 @@ async function getEventLogos(
           // Generate Football-Data.org crest URL from external ID
           logos.home = `https://crests.football-data.org/${homeTeam.externalId}.png`;
         }
+        // If team not in database, logos.home stays undefined (fallback to initials)
         
         if (awayTeam?.logoUrl) {
           logos.away = awayTeam.logoUrl;
@@ -55,15 +56,20 @@ async function getEventLogos(
       break;
     case 'BASKETBALL':
       if (event.basketballGame) {
+        // NBA logos use static mappings - always try to get them
         logos.home = getNBATeamLogo(event.basketballGame.homeTeam);
         logos.away = getNBATeamLogo(event.basketballGame.awayTeam);
       }
       break;
     case 'BASEBALL':
       if (event.baseballGame) {
+        // MLB logos use static mappings - always try to get them
         logos.home = getMLBTeamLogo(event.baseballGame.homeTeam);
         logos.away = getMLBTeamLogo(event.baseballGame.awayTeam);
       }
+      break;
+    case 'TENNIS':
+      // Tennis uses player initials fallback in TeamLogo component
       break;
     case 'CONCERT':
       if (event.concert?.artist) {

@@ -8,9 +8,9 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 interface TeamLogoProps {
-  logoUrl: string | null | undefined;
+  logoUrl?: string | null | undefined;
   teamName: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   className?: string;
   sport?: 'SOCCER' | 'BASKETBALL' | 'BASEBALL' | 'TENNIS' | 'CONCERT';
 }
@@ -20,6 +20,7 @@ const sizeClasses = {
   md: 'w-8 h-8',
   lg: 'w-12 h-12',
   xl: 'w-16 h-16',
+  '2xl': 'w-24 h-24',
 };
 
 const fontSizeClasses = {
@@ -27,6 +28,7 @@ const fontSizeClasses = {
   md: 'text-sm',
   lg: 'text-lg',
   xl: 'text-2xl',
+  '2xl': 'text-3xl',
 };
 
 // Get emoji fallback for sport type
@@ -142,7 +144,7 @@ export function TeamLogo({
 interface ArtistPhotoProps {
   photoUrl: string | null | undefined;
   artistName: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   className?: string;
 }
 

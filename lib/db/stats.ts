@@ -3,6 +3,7 @@
 // ✅ Code Quality Agent: Optimized aggregations, proper error handling
 
 import prisma from '@/lib/prisma';
+import { normalizeTeamName } from '@/lib/utils/team-names';
 
 // Types for stats results
 export interface PlayerLeaderboardEntry {
@@ -20,6 +21,9 @@ export interface PlayerLeaderboardEntry {
 
 export interface TeamStatsEntry {
   teamName: string;
+  sport?: string;
+  logoUrl?: string | null;
+  externalId?: number | null;
   wins: number;
   losses: number;
   draws: number;
@@ -460,15 +464,16 @@ export async function getTeamStats(
     },
   });
 
-  // Aggregate by team
+  // Aggregate by team (normalize names to consolidate across APIs)
   const teamStatsMap = new Map<string, TeamStatsEntry>();
 
   for (const event of events) {
     const match = event.soccerMatch || event.basketballGame || event.baseballGame;
     if (!match) continue;
 
-    const homeTeam = match.homeTeam;
-    const awayTeam = match.awayTeam;
+    // Normalize team names so "Manchester United FC" and "Manchester United" merge
+    const homeTeam = normalizeTeamName(match.homeTeam);
+    const awayTeam = normalizeTeamName(match.awayTeam);
     const homeScore = match.homeScore || 0;
     const awayScore = match.awayScore || 0;
 
@@ -525,9 +530,27 @@ export async function getTeamStats(
     else awayStats.draws++;
   }
 
-  return Array.from(teamStatsMap.values()).sort(
-    (a, b) => b.totalGames - a.totalGames
-  );
+  // Enrich with team logos from the Team table
+  const teamNames = Array.from(teamStatsMap.keys());
+  const teams = await prisma.team.findMany({
+    where: { name: { in: teamNames } },
+    select: { name: true, sport: true, logoUrl: true, externalId: true },
+  });
+  
+  // Also look up logos using the un-normalized names in case the Team table has old data
+  const teamLookup = new Map(teams.map(t => [t.name, t]));
+
+  const result = Array.from(teamStatsMap.values()).map(stat => {
+    const teamInfo = teamLookup.get(stat.teamName);
+    return {
+      ...stat,
+      sport: teamInfo?.sport?.toLowerCase() || undefined,
+      logoUrl: teamInfo?.logoUrl || null,
+      externalId: teamInfo?.externalId ? parseInt(teamInfo.externalId) : null,
+    };
+  });
+
+  return result.sort((a, b) => b.totalGames - a.totalGames);
 }
 
 // Get venue stats

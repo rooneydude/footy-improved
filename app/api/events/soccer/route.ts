@@ -7,6 +7,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { normalizeTeamName } from '@/lib/utils/team-names';
 
 // Input validation schema
 const soccerEventSchema = z.object({
@@ -64,6 +65,10 @@ export async function POST(request: NextRequest) {
     }
 
     const validated = parseResult.data;
+    
+    // Normalize team names to handle API differences (e.g. "Manchester United FC" vs "Manchester United")
+    const normalizedHomeTeam = normalizeTeamName(validated.homeTeam);
+    const normalizedAwayTeam = normalizeTeamName(validated.awayTeam);
 
     // Create event with transaction
     const event = await prisma.$transaction(async (tx) => {
@@ -88,15 +93,15 @@ export async function POST(request: NextRequest) {
       }
 
       // Create or update home team with logo
-      if (validated.homeTeam) {
+      if (normalizedHomeTeam) {
         const existingHomeTeam = await tx.team.findFirst({
-          where: { name: validated.homeTeam, sport: 'SOCCER' },
+          where: { name: normalizedHomeTeam, sport: 'SOCCER' },
         });
         
         if (!existingHomeTeam) {
           await tx.team.create({
             data: {
-              name: validated.homeTeam,
+              name: normalizedHomeTeam,
               sport: 'SOCCER',
               externalId: validated.homeTeamId,
               logoUrl: validated.homeTeamCrest,
@@ -116,15 +121,15 @@ export async function POST(request: NextRequest) {
       }
 
       // Create or update away team with logo
-      if (validated.awayTeam) {
+      if (normalizedAwayTeam) {
         const existingAwayTeam = await tx.team.findFirst({
-          where: { name: validated.awayTeam, sport: 'SOCCER' },
+          where: { name: normalizedAwayTeam, sport: 'SOCCER' },
         });
         
         if (!existingAwayTeam) {
           await tx.team.create({
             data: {
-              name: validated.awayTeam,
+              name: normalizedAwayTeam,
               sport: 'SOCCER',
               externalId: validated.awayTeamId,
               logoUrl: validated.awayTeamCrest,
@@ -155,8 +160,8 @@ export async function POST(request: NextRequest) {
           companions: validated.companions,
           soccerMatch: {
             create: {
-              homeTeam: validated.homeTeam,
-              awayTeam: validated.awayTeam,
+              homeTeam: normalizedHomeTeam,
+              awayTeam: normalizedAwayTeam,
               homeScore: validated.homeScore,
               awayScore: validated.awayScore,
               competition: validated.competition,

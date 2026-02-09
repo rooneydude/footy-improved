@@ -76,6 +76,8 @@ export interface BasketballPlayerAppearance {
   playerName: string;
   team: 'home' | 'away';
   points: number;
+  rebounds: number;
+  assists: number;
 }
 
 export interface BaseballPlayerAppearance {
@@ -96,8 +98,8 @@ interface MatchSearchProps {
 
 export function MatchSearch({ sportType, onMatchSelect, onPlayersLoaded }: MatchSearchProps) {
   const [query, setQuery] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [selectedYear, setSelectedYear] = useState<string>('');
+  const [selectedMonth, setSelectedMonth] = useState<string>('');
   const [results, setResults] = useState<MatchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
@@ -106,20 +108,75 @@ export function MatchSearch({ sportType, onMatchSelect, onPlayersLoaded }: Match
 
   const debouncedQuery = useDebounce(query, 400);
 
-  // Set default date range (last 30 days to today)
+  // Set default to current year and month
   useEffect(() => {
     const today = new Date();
-    const thirtyDaysAgo = new Date(today);
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    setDateTo(today.toISOString().split('T')[0]);
-    setDateFrom(thirtyDaysAgo.toISOString().split('T')[0]);
+    setSelectedYear(today.getFullYear().toString());
+    setSelectedMonth((today.getMonth() + 1).toString().padStart(2, '0'));
   }, []);
 
-  // Search when query or dates change
+  // Generate year options (current year down to 20 years ago)
+  const yearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let y = currentYear; y >= currentYear - 20; y--) {
+      years.push(y);
+    }
+    return years;
+  };
+
+  // Month options
+  const monthOptions = [
+    { value: '01', label: 'January' },
+    { value: '02', label: 'February' },
+    { value: '03', label: 'March' },
+    { value: '04', label: 'April' },
+    { value: '05', label: 'May' },
+    { value: '06', label: 'June' },
+    { value: '07', label: 'July' },
+    { value: '08', label: 'August' },
+    { value: '09', label: 'September' },
+    { value: '10', label: 'October' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'December' },
+  ];
+
+  // Calculate date range from year/month selection
+  const getDateRange = () => {
+    if (!selectedYear) {
+      return { dateFrom: '', dateTo: '' };
+    }
+
+    const year = parseInt(selectedYear);
+    
+    if (selectedMonth) {
+      // Specific month selected
+      const month = parseInt(selectedMonth) - 1; // JS months are 0-indexed
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0); // Last day of month
+      
+      return {
+        dateFrom: firstDay.toISOString().split('T')[0],
+        dateTo: lastDay.toISOString().split('T')[0],
+      };
+    } else {
+      // Whole year
+      return {
+        dateFrom: `${year}-01-01`,
+        dateTo: `${year}-12-31`,
+      };
+    }
+  };
+
+  // Search when query or year/month change
   useEffect(() => {
     if (!debouncedQuery || debouncedQuery.length < 2) {
       setResults([]);
+      return;
+    }
+
+    // Skip if year not yet set (initial load)
+    if (!selectedYear) {
       return;
     }
 
@@ -139,11 +196,31 @@ export function MatchSearch({ sportType, onMatchSelect, onPlayersLoaded }: Match
           params.append('team', debouncedQuery);
         }
         
-        if (dateFrom) params.append('dateFrom', dateFrom);
-        if (dateTo) params.append('dateTo', dateTo);
+        // Calculate date range inline to avoid stale closure
+        const year = parseInt(selectedYear);
+        let dateFrom: string;
+        let dateTo: string;
+        
+        if (selectedMonth) {
+          const month = parseInt(selectedMonth) - 1;
+          const firstDay = new Date(year, month, 1);
+          const lastDay = new Date(year, month + 1, 0);
+          dateFrom = firstDay.toISOString().split('T')[0];
+          dateTo = lastDay.toISOString().split('T')[0];
+        } else {
+          dateFrom = `${year}-01-01`;
+          dateTo = `${year}-12-31`;
+        }
+        
+        params.append('dateFrom', dateFrom);
+        params.append('dateTo', dateTo);
+
+        console.log(`[MatchSearch] Searching ${sportType}: "${debouncedQuery}" from ${dateFrom} to ${dateTo}`);
 
         const response = await fetch(`${endpoint}?${params}`);
         const data = await response.json();
+
+        console.log(`[MatchSearch] API response:`, { success: data.success, results: data.data?.length || 0, meta: data.meta });
 
         if (!response.ok) {
           throw new Error(data.error || 'Failed to search matches');
@@ -161,7 +238,7 @@ export function MatchSearch({ sportType, onMatchSelect, onPlayersLoaded }: Match
     };
 
     searchMatches();
-  }, [debouncedQuery, dateFrom, dateTo, sportType]);
+  }, [debouncedQuery, selectedYear, selectedMonth, sportType]);
 
   // Get search endpoint based on sport type
   const getSearchEndpoint = (sport: SportType): string => {
@@ -351,6 +428,13 @@ export function MatchSearch({ sportType, onMatchSelect, onPlayersLoaded }: Match
         {/* Search Form - Expandable */}
         {isExpanded && (
           <div className="mt-4 space-y-4">
+            {/* Historical data note */}
+            {parseInt(selectedYear) < new Date().getFullYear() - 2 && (
+              <div className="text-xs text-amber-500/80 bg-amber-500/10 px-3 py-2 rounded-lg">
+                Note: Historical match data may be limited. If you can't find a match, you can enter details manually below.
+              </div>
+            )}
+            
             {/* Team Search */}
             <div>
               <label className="block text-sm font-medium mb-2">
@@ -376,29 +460,42 @@ export function MatchSearch({ sportType, onMatchSelect, onPlayersLoaded }: Match
               </div>
             </div>
 
-            {/* Date Range */}
+            {/* Year and Month Selection */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
                   <Calendar className="h-4 w-4 inline mr-1" />
-                  From Date
+                  Year
                 </label>
-                <Input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                />
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className="w-full h-10 rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {yearOptions().map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">
                   <Calendar className="h-4 w-4 inline mr-1" />
-                  To Date
+                  Month
                 </label>
-                <Input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                />
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="w-full h-10 rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="">All Months</option>
+                  {monthOptions.map((m) => (
+                    <option key={m.value} value={m.value}>
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -493,7 +590,16 @@ export function MatchSearch({ sportType, onMatchSelect, onPlayersLoaded }: Match
             {!isLoading && query.length >= 2 && results.length === 0 && !error && (
               <div className="text-center py-8 text-muted-foreground">
                 <p>No matches found for "{query}"</p>
-                <p className="text-sm mt-1">Try a different team name or date range</p>
+                <p className="text-sm mt-1">
+                  {parseInt(selectedYear) < new Date().getFullYear() - 2 ? (
+                    <>Historical data may be limited. Try searching for more recent seasons.</>
+                  ) : (
+                    <>Try a different team name or time period</>
+                  )}
+                </p>
+                <p className="text-xs mt-2 text-muted-foreground/70">
+                  Searched: {selectedMonth ? monthOptions.find(m => m.value === selectedMonth)?.label : 'All'} {selectedYear}
+                </p>
               </div>
             )}
 

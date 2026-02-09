@@ -191,12 +191,23 @@ async function fetchFromApiFootball<T>(endpoint: string): Promise<T> {
 // Competition IDs for leagues not covered by football-data.org
 // These are API-Football league IDs
 const EXTENDED_COMPETITIONS: Record<string, number> = {
-  // European
+  // Top 5 European Leagues (also searched via API-Football for historical data)
+  'PL': 39,     // Premier League (England)
+  'PD': 140,    // La Liga (Spain)
+  'BL1': 78,    // Bundesliga (Germany)
+  'SA': 135,    // Serie A (Italy)
+  'FL1': 61,    // Ligue 1 (France)
+  
+  // European Club Competitions
+  'CL': 2,      // Champions League
   'EL': 3,      // Europa League
   'ECL': 848,   // Europa Conference League
   'USC': 531,   // UEFA Super Cup
   
-  // International
+  // International / FIFA
+  'CWC': 15,    // FIFA Club World Cup
+  'WC': 1,      // World Cup
+  'EC': 4,      // European Championship
   'CA': 9,      // Copa America
   'GC': 22,     // Gold Cup (CONCACAF)
   'AFCON': 6,   // Africa Cup of Nations
@@ -332,9 +343,9 @@ function getSeasonForCompetition(compCode: string, dateFrom?: string): number {
   const searchMonth = searchDate.getMonth() + 1; // 1-12
   
   // For calendar year competitions (MLS, Liga MX), use the year directly
+  // MLS 2025 season runs Feb-Dec 2025
   if (CALENDAR_YEAR_COMPETITIONS.includes(compCode)) {
-    // Cap at 2024 for free tier API limits
-    return Math.min(searchYear, 2024);
+    return searchYear;
   }
   
   // For European/cross-year competitions:
@@ -342,10 +353,10 @@ function getSeasonForCompetition(compCode: string, dateFrom?: string): number {
   // - If searching Aug-Dec, the season started this year
   // Example: May 2024 → season 2023 (2023-24 season)
   //          October 2024 → season 2024 (2024-25 season)
+  //          Feb 2026 → season 2025 (2025-26 season)
   const season = searchMonth <= 7 ? searchYear - 1 : searchYear;
   
-  // Cap at 2024 for free tier API limits
-  return Math.min(season, 2024);
+  return season;
 }
 
 // Search matches in extended competitions
@@ -357,9 +368,9 @@ export async function searchExtendedMatches(
 ): Promise<ApiFootballMatch[]> {
   const allMatches: ApiFootballMatch[] = [];
   
-  // Use specified competitions or default to key extended ones (avoid timeout)
-  // Priority competitions: Europa League, Copa America, FA Cup, MLS
-  const defaultComps = ['EL', 'CA', 'FAC', 'MLS', 'CDR', 'DFB'];
+  // Use specified competitions or default to major leagues + extended
+  // Priority: Top 5 European leagues, CL, EL, major cups, MLS
+  const defaultComps = ['PL', 'PD', 'BL1', 'SA', 'FL1', 'CL', 'EL', 'FAC', 'CDR', 'DFB', 'MLS'];
   const competitionsToSearch = competitions || defaultComps;
   
   for (const compCode of competitionsToSearch) {
@@ -521,23 +532,38 @@ export async function searchTeamInExtended(teamName: string): Promise<{ id: numb
 // Get available extended competitions
 export function getExtendedCompetitions(): Array<{ code: string; id: number; name: string }> {
   const competitionNames: Record<string, string> = {
+    // Top 5 European Leagues
+    'PL': 'Premier League',
+    'PD': 'La Liga',
+    'BL1': 'Bundesliga',
+    'SA': 'Serie A',
+    'FL1': 'Ligue 1',
+    // European Competitions
+    'CL': 'UEFA Champions League',
     'EL': 'UEFA Europa League',
     'ECL': 'UEFA Conference League',
     'USC': 'UEFA Super Cup',
+    // International
+    'CWC': 'FIFA Club World Cup',
+    'WC': 'FIFA World Cup',
+    'EC': 'UEFA European Championship',
     'CA': 'Copa America',
     'GC': 'CONCACAF Gold Cup',
     'AFCON': 'Africa Cup of Nations',
     'AC': 'AFC Asian Cup',
+    // Domestic Cups
     'FAC': 'FA Cup',
     'EFL': 'EFL Cup',
     'CDR': 'Copa del Rey',
     'DFB': 'DFB Pokal',
     'CIF': 'Coppa Italia',
     'CDF': 'Coupe de France',
+    // Americas
     'MLS': 'MLS',
     'LMX': 'Liga MX',
     'CL_CONMEBOL': 'Copa Libertadores',
     'CS': 'Copa Sudamericana',
+    // Other
     'SPL': 'Scottish Premiership',
     'JPL': 'Belgian Pro League',
     'SL': 'Super Lig',

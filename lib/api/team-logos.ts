@@ -6,6 +6,7 @@
 // ✅ Code Quality Agent: Caching, fallbacks, type safety
 
 import { prisma } from '@/lib/prisma';
+import { normalizeTeamName } from '@/lib/utils/team-names';
 
 // Logo URL patterns for different sports
 const LOGO_PATTERNS = {
@@ -186,9 +187,10 @@ export async function findOrCreateTeam(
     logoUrl?: string;
   }
 ) {
+  const normalizedName = normalizeTeamName(name);
   let team = await prisma.team.findFirst({
     where: {
-      name,
+      name: normalizedName,
       sport,
     },
   });
@@ -197,14 +199,14 @@ export async function findOrCreateTeam(
     // Try to get logo URL based on sport
     let logoUrl = options?.logoUrl;
     if (!logoUrl && options?.externalId) {
-      logoUrl = getTeamLogoUrl(name, sport.toLowerCase() as 'soccer' | 'basketball' | 'baseball', options.externalId) || undefined;
+      logoUrl = getTeamLogoUrl(normalizedName, sport.toLowerCase() as 'soccer' | 'basketball' | 'baseball', options.externalId) || undefined;
     } else if (!logoUrl) {
-      logoUrl = getTeamLogoUrl(name, sport.toLowerCase() as 'soccer' | 'basketball' | 'baseball') || undefined;
+      logoUrl = getTeamLogoUrl(normalizedName, sport.toLowerCase() as 'soccer' | 'basketball' | 'baseball') || undefined;
     }
 
     team = await prisma.team.create({
       data: {
-        name,
+        name: normalizedName,
         sport,
         shortName: options?.shortName,
         tla: options?.tla,
@@ -228,10 +230,11 @@ export async function getTeamWithLogo(
   externalId?: string
 ): Promise<{ id: string; name: string; logoUrl: string | null }> {
   const sportLower = sport.toLowerCase() as 'soccer' | 'basketball' | 'baseball';
+  const normalizedName = normalizeTeamName(teamName);
   
   // Try to find existing team
   let team = await prisma.team.findFirst({
-    where: { name: teamName, sport },
+    where: { name: normalizedName, sport },
   });
 
   if (team) {
@@ -239,11 +242,11 @@ export async function getTeamWithLogo(
   }
 
   // Create new team with logo
-  const logoUrl = getTeamLogoUrl(teamName, sportLower, externalId);
+  const logoUrl = getTeamLogoUrl(normalizedName, sportLower, externalId);
   
   team = await prisma.team.create({
     data: {
-      name: teamName,
+      name: normalizedName,
       sport,
       externalId,
       logoUrl,
@@ -262,11 +265,14 @@ export async function getTeamLogos(
 ): Promise<Map<string, string | null>> {
   const logoMap = new Map<string, string | null>();
   const sportLower = sport.toLowerCase() as 'soccer' | 'basketball' | 'baseball';
+  
+  // Normalize all input names
+  const normalizedNames = teamNames.map(n => normalizeTeamName(n));
 
   // First check database for existing teams
   const existingTeams = await prisma.team.findMany({
     where: {
-      name: { in: teamNames },
+      name: { in: normalizedNames },
       sport,
     },
   });
@@ -276,7 +282,7 @@ export async function getTeamLogos(
   }
 
   // For teams not in database, generate logo URLs
-  for (const teamName of teamNames) {
+  for (const teamName of normalizedNames) {
     if (!logoMap.has(teamName)) {
       logoMap.set(teamName, getTeamLogoUrl(teamName, sportLower));
     }

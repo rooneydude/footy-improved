@@ -30,9 +30,11 @@ export interface SoccerPlayer extends BasePlayer {
   cleanSheet: boolean;
 }
 
-// Basketball player stats - KEY STAT ONLY: Points
+// Basketball player stats: Points, Rebounds, Assists
 export interface BasketballPlayer extends BasePlayer {
   points: number;
+  rebounds: number;
+  assists: number;
 }
 
 // Baseball player stats - KEY STATS ONLY: Home Runs & RBIs
@@ -90,6 +92,8 @@ export function PlayerStatsEditor({
         return {
           ...base,
           points: 0,
+          rebounds: 0,
+          assists: 0,
         } as BasketballPlayer;
       case 'baseball':
         return {
@@ -217,16 +221,49 @@ export function PlayerStatsEditor({
       case 'basketball':
         const basketballPlayer = player as BasketballPlayer;
         return (
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-lg">🏀</span>
-            <Input
-              type="number"
-              min="0"
-              value={basketballPlayer.points}
-              onChange={(e) => updatePlayer(globalIndex, { points: parseInt(e.target.value) || 0 })}
-              className="h-8 text-sm text-center font-mono w-20"
-            />
-            <span className="text-xs text-muted-foreground">pts</span>
+          <div className="grid grid-cols-3 gap-3 mt-2">
+            {/* Points */}
+            <div className="flex flex-col items-center">
+              <span className="text-xs text-muted-foreground mb-1">Points</span>
+              <div className="flex items-center gap-1">
+                <span className="text-base">🏀</span>
+                <Input
+                  type="number"
+                  min="0"
+                  value={basketballPlayer.points}
+                  onChange={(e) => updatePlayer(globalIndex, { points: parseInt(e.target.value) || 0 })}
+                  className="h-8 text-sm text-center font-mono w-14"
+                />
+              </div>
+            </div>
+            {/* Rebounds */}
+            <div className="flex flex-col items-center">
+              <span className="text-xs text-muted-foreground mb-1">Rebounds</span>
+              <div className="flex items-center gap-1">
+                <span className="text-base">📊</span>
+                <Input
+                  type="number"
+                  min="0"
+                  value={basketballPlayer.rebounds}
+                  onChange={(e) => updatePlayer(globalIndex, { rebounds: parseInt(e.target.value) || 0 })}
+                  className="h-8 text-sm text-center font-mono w-14"
+                />
+              </div>
+            </div>
+            {/* Assists */}
+            <div className="flex flex-col items-center">
+              <span className="text-xs text-muted-foreground mb-1">Assists</span>
+              <div className="flex items-center gap-1">
+                <span className="text-base">🅰️</span>
+                <Input
+                  type="number"
+                  min="0"
+                  value={basketballPlayer.assists}
+                  onChange={(e) => updatePlayer(globalIndex, { assists: parseInt(e.target.value) || 0 })}
+                  className="h-8 text-sm text-center font-mono w-14"
+                />
+              </div>
+            </div>
           </div>
         );
 
@@ -340,7 +377,7 @@ export function PlayerStatsEditor({
   const getStatLabel = (): string => {
     switch (sportType) {
       case 'soccer': return 'Goals, Assists, Cards';
-      case 'basketball': return 'Points';
+      case 'basketball': return 'Points, Rebounds, Assists';
       case 'baseball': return 'Home Runs & RBIs';
       case 'tennis': return 'Winner';
     }
@@ -408,7 +445,7 @@ export function PlayerStatsEditor({
           <div className="text-xs text-muted-foreground border-t border-border pt-4">
             <span className="font-medium">Tracking: </span>
             {sportType === 'soccer' && '⚽ Goals • 🅰️ Assists • 🟨 Yellow • 🟥 Red • 🧤 Clean Sheet'}
-            {sportType === 'basketball' && '🏀 Points scored'}
+            {sportType === 'basketball' && '🏀 Points • 📊 Rebounds • 🅰️ Assists'}
             {sportType === 'baseball' && '💣 Home Runs • RBI = Runs Batted In'}
             {sportType === 'tennis' && '🏆 Match winner'}
           </div>

@@ -7,6 +7,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { normalizeTeamName } from '@/lib/utils/team-names';
 
 // Input validation schema
 const baseballEventSchema = z.object({
@@ -61,6 +62,10 @@ export async function POST(request: NextRequest) {
     }
 
     const validated = parseResult.data;
+    
+    // Normalize team names to handle API differences
+    const normalizedHomeTeam = normalizeTeamName(validated.homeTeam);
+    const normalizedAwayTeam = normalizeTeamName(validated.awayTeam);
 
     // Create event with transaction
     const event = await prisma.$transaction(async (tx) => {
@@ -96,8 +101,8 @@ export async function POST(request: NextRequest) {
           companions: validated.companions,
           baseballGame: {
             create: {
-              homeTeam: validated.homeTeam,
-              awayTeam: validated.awayTeam,
+              homeTeam: normalizedHomeTeam,
+              awayTeam: normalizedAwayTeam,
               homeScore: validated.homeScore,
               awayScore: validated.awayScore,
               competition: validated.competition,
