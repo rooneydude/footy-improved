@@ -114,16 +114,19 @@ export default function SoccerFormPage() {
   // Handle players loaded from API
   const handlePlayersLoaded = (loadedPlayers: PlayerAppearance[]) => {
     const soccerPlayers = loadedPlayers as SoccerPlayerAppearance[];
-    const formattedPlayers: SoccerPlayer[] = soccerPlayers.map((p) => ({
-      id: p.playerId,
-      name: p.playerName,
-      team: p.team,
-      goals: p.goals,
-      assists: p.assists,
-      yellowCard: p.yellowCard,
-      redCard: p.redCard,
-      cleanSheet: p.cleanSheet,
-    }));
+    // Filter out players with blank/empty names (API data gaps)
+    const formattedPlayers: SoccerPlayer[] = soccerPlayers
+      .filter((p) => p.playerName && p.playerName.trim().length > 0)
+      .map((p) => ({
+        id: p.playerId,
+        name: p.playerName,
+        team: p.team,
+        goals: p.goals,
+        assists: p.assists,
+        yellowCard: p.yellowCard,
+        redCard: p.redCard,
+        cleanSheet: p.cleanSheet,
+      }));
     setPlayers(formattedPlayers);
   };
 
@@ -137,16 +140,19 @@ export default function SoccerFormPage() {
         awayTeamId: teamCrests.awayId,
         homeTeamCrest: teamCrests.home,
         awayTeamCrest: teamCrests.away,
-        appearances: players.map((p) => ({
-          playerName: p.name,
-          externalId: p.id,
-          team: p.team,
-          goals: p.goals,
-          assists: p.assists,
-          yellowCard: p.yellowCard,
-          redCard: p.redCard,
-          cleanSheet: p.cleanSheet,
-        })),
+        // Filter out players with blank names (can happen from API data gaps)
+        appearances: players
+          .filter((p) => p.name && p.name.trim().length > 0)
+          .map((p) => ({
+            playerName: p.name.trim(),
+            externalId: p.id,
+            team: p.team,
+            goals: p.goals,
+            assists: p.assists,
+            yellowCard: p.yellowCard,
+            redCard: p.redCard,
+            cleanSheet: p.cleanSheet,
+          })),
       };
 
       const response = await fetch('/api/events/soccer', {

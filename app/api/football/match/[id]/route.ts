@@ -199,6 +199,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       console.log('Fallback players created:', players.length);
     }
 
+    // Filter out players with blank/empty names (can happen with unnamed assists or API gaps)
+    players = players.filter(p => p.playerName && p.playerName.trim().length > 0);
+
     console.log('Final players to return:', players.length, players);
 
     // If no players and using football-data.org, explain why
