@@ -475,14 +475,19 @@ export async function getExtendedMatchDetails(fixtureId: number): Promise<ApiFoo
   const substitutions: Substitution[] = [];
 
   for (const event of eventsData.response || []) {
+    // Skip events where player data is null/missing (API sometimes returns null player IDs)
     if (event.type === 'Goal') {
+      if (!event.player.id || !event.player.name) continue;
       goals.push({
         minute: event.time.elapsed,
         team: { id: event.team.id, name: event.team.name },
         scorer: { id: event.player.id, name: event.player.name },
-        assist: event.assist.id ? { id: event.assist.id, name: event.assist.name || '' } : undefined,
+        assist: event.assist?.id && event.assist?.name
+          ? { id: event.assist.id, name: event.assist.name }
+          : undefined,
       });
     } else if (event.type === 'Card') {
+      if (!event.player.id || !event.player.name) continue; // Skip cards with null players
       bookings.push({
         minute: event.time.elapsed,
         team: { id: event.team.id, name: event.team.name },
@@ -491,11 +496,14 @@ export async function getExtendedMatchDetails(fixtureId: number): Promise<ApiFoo
               event.detail === 'Red Card' ? 'RED_CARD' : 'YELLOW_RED_CARD',
       });
     } else if (event.type === 'subst') {
+      if (!event.player.id || !event.player.name) continue;
       substitutions.push({
         minute: event.time.elapsed,
         team: { id: event.team.id, name: event.team.name },
         playerOut: { id: event.player.id, name: event.player.name },
-        playerIn: { id: event.assist.id || 0, name: event.assist.name || '' },
+        playerIn: event.assist?.id && event.assist?.name
+          ? { id: event.assist.id, name: event.assist.name }
+          : { id: 0, name: '' },
       });
     }
   }

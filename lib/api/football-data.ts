@@ -257,6 +257,8 @@ export function processMatchToAppearances(match: FootballMatchDetails): {
 
   // Add goals and assists - create players if they don't exist
   for (const goal of match.goals || []) {
+    // Skip entries with null/missing player data
+    if (!goal.scorer?.id || !goal.scorer?.name) continue;
     const isHome = goal.team.id === match.homeTeam.id;
     const appearances = isHome ? homeAppearances : awayAppearances;
     
@@ -264,8 +266,8 @@ export function processMatchToAppearances(match: FootballMatchDetails): {
     const scorerApp = findOrCreateAppearance(appearances, goal.scorer.id, goal.scorer.name);
     scorerApp.goals++;
 
-    // Add/update assister (if exists)
-    if (goal.assist) {
+    // Add/update assister (if exists and has valid data)
+    if (goal.assist?.id && goal.assist?.name) {
       const assistApp = findOrCreateAppearance(appearances, goal.assist.id, goal.assist.name);
       assistApp.assists++;
     }
@@ -273,6 +275,8 @@ export function processMatchToAppearances(match: FootballMatchDetails): {
 
   // Add bookings - create players if they don't exist
   for (const booking of match.bookings || []) {
+    // Skip entries with null/missing player data
+    if (!booking.player?.id || !booking.player?.name) continue;
     const isHome = booking.team.id === match.homeTeam.id;
     const appearances = isHome ? homeAppearances : awayAppearances;
     
@@ -289,9 +293,13 @@ export function processMatchToAppearances(match: FootballMatchDetails): {
     const isHome = sub.team.id === match.homeTeam.id;
     const appearances = isHome ? homeAppearances : awayAppearances;
     
-    // Both players who came on and went off played in the match
-    findOrCreateAppearance(appearances, sub.playerOut.id, sub.playerOut.name);
-    findOrCreateAppearance(appearances, sub.playerIn.id, sub.playerIn.name);
+    // Both players who came on and went off played in the match (skip null entries)
+    if (sub.playerOut?.id && sub.playerOut?.name) {
+      findOrCreateAppearance(appearances, sub.playerOut.id, sub.playerOut.name);
+    }
+    if (sub.playerIn?.id && sub.playerIn?.name) {
+      findOrCreateAppearance(appearances, sub.playerIn.id, sub.playerIn.name);
+    }
   }
 
   // Mark clean sheets for goalkeepers
