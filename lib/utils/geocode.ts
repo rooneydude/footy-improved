@@ -21,9 +21,12 @@ export async function geocodeVenue(
   city: string,
   country: string
 ): Promise<GeocodeResult | null> {
-  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  // Check both server-side and client-side env var names
+  // MAPBOX_TOKEN is the server-side runtime variable
+  // NEXT_PUBLIC_MAPBOX_TOKEN is available at build time for client components
+  const token = process.env.MAPBOX_TOKEN || process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
   if (!token) {
-    console.warn('[Geocode] NEXT_PUBLIC_MAPBOX_TOKEN not set, skipping geocoding');
+    console.warn('[Geocode] MAPBOX_TOKEN / NEXT_PUBLIC_MAPBOX_TOKEN not set, skipping geocoding');
     return null;
   }
 
