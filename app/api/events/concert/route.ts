@@ -7,6 +7,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { ensureVenueCoordinates, updateVenueCoordinates } from '@/lib/utils/geocode';
 
 // Input validation schema
 const concertEventSchema = z.object({
@@ -22,6 +23,9 @@ const concertEventSchema = z.object({
   notes: z.string().optional(),
   rating: z.number().min(1).max(5).optional(),
   companions: z.array(z.string()).default([]),
+  // Venue coordinates from Setlist.fm
+  venueLatitude: z.number().optional(),
+  venueLongitude: z.number().optional(),
   setlist: z.array(z.object({
     songName: z.string().min(1),
     order: z.number().min(1),
@@ -144,6 +148,26 @@ export async function POST(request: NextRequest) {
         },
       });
     });
+
+    // Store venue coordinates (fire-and-forget)
+    if (event?.venue) {
+      if (validated.venueLatitude && validated.venueLongitude) {
+        // Use Setlist.fm coordinates directly
+        updateVenueCoordinates(
+          event.venue.id,
+          validated.venueLatitude,
+          validated.venueLongitude
+        ).catch(() => {});
+      } else {
+        // Fallback to geocoding
+        ensureVenueCoordinates(
+          event.venue.id,
+          event.venue.name,
+          event.venue.city,
+          event.venue.country
+        ).catch(() => {});
+      }
+    }
 
     return NextResponse.json({ success: true, data: event }, { status: 201 });
   } catch (error) {

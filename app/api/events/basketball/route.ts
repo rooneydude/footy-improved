@@ -8,6 +8,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { normalizeTeamName } from '@/lib/utils/team-names';
+import { ensureVenueCoordinates } from '@/lib/utils/geocode';
 
 // Input validation schema
 const basketballEventSchema = z.object({
@@ -172,6 +173,16 @@ export async function POST(request: NextRequest) {
       timeout: 60000, // 60 second timeout for many players
       maxWait: 10000, // Max 10 seconds to acquire connection
     });
+
+    // Geocode venue in the background (fire-and-forget)
+    if (event?.venue) {
+      ensureVenueCoordinates(
+        event.venue.id,
+        event.venue.name,
+        event.venue.city,
+        event.venue.country
+      ).catch(() => {});
+    }
 
     return NextResponse.json({ success: true, data: event }, { status: 201 });
   } catch (error) {

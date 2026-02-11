@@ -7,6 +7,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { ensureVenueCoordinates } from '@/lib/utils/geocode';
 
 // Input validation schema
 const tennisEventSchema = z.object({
@@ -178,6 +179,16 @@ export async function POST(request: NextRequest) {
         },
       });
     });
+
+    // Geocode venue in the background (fire-and-forget)
+    if (event?.venue) {
+      ensureVenueCoordinates(
+        event.venue.id,
+        event.venue.name,
+        event.venue.city,
+        event.venue.country
+      ).catch(() => {});
+    }
 
     return NextResponse.json({ success: true, data: event }, { status: 201 });
   } catch (error) {

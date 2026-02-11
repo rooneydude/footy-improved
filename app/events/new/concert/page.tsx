@@ -45,6 +45,7 @@ export default function ConcertFormPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [setlist, setSetlist] = useState<LocalSetlistSong[]>([]);
   const [newSong, setNewSong] = useState('');
+  const [venueCoords, setVenueCoords] = useState<{ lat?: number; lng?: number }>({});
 
   const {
     register,
@@ -79,6 +80,13 @@ export default function ConcertFormPage() {
       setValue('date', date.toISOString().split('T')[0]);
     }
     
+    // Store venue coordinates from Setlist.fm
+    if (concert.latitude && concert.longitude) {
+      setVenueCoords({ lat: concert.latitude, lng: concert.longitude });
+    } else {
+      setVenueCoords({});
+    }
+
     // Load setlist
     const allSongs: LocalSetlistSong[] = [
       ...concert.songs.map((s: SetlistSong) => ({
@@ -120,6 +128,8 @@ export default function ConcertFormPage() {
       const payload = {
         ...data,
         openingActs: data.openingActs ? data.openingActs.split(',').map((s) => s.trim()) : [],
+        venueLatitude: venueCoords.lat,
+        venueLongitude: venueCoords.lng,
         setlist: setlist.map((song, index) => ({
           songName: song.songName,
           order: index + 1,
