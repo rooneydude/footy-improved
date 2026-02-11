@@ -30,14 +30,14 @@ export interface ApiFootballMatch {
     name: string;
     shortName: string;
     tla: string;
-    crest: string;
+    crest: string | null;
   };
   awayTeam: {
     id: number;
     name: string;
     shortName: string;
     tla: string;
-    crest: string;
+    crest: string | null;
   };
   score: {
     winner: string | null;
@@ -267,14 +267,14 @@ function convertFixture(fixture: ApiFootballFixture): ApiFootballMatch | null {
       name: homeName,
       shortName: homeName.split(' ')[0] || homeName,
       tla: homeName.substring(0, 3).toUpperCase(),
-      crest: fixture.teams.home.logo || '',
+      crest: fixture.teams.home.logo || null,
     },
     awayTeam: {
       id: fixture.teams.away.id || 0,
       name: awayName,
       shortName: awayName.split(' ')[0] || awayName,
       tla: awayName.substring(0, 3).toUpperCase(),
-      crest: fixture.teams.away.logo || '',
+      crest: fixture.teams.away.logo || null,
     },
     score: {
       winner,

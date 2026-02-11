@@ -156,8 +156,15 @@ export default function SoccerFormPage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create event');
+        const errorData = await response.json();
+        // Show detailed validation errors if available
+        if (errorData.details && Array.isArray(errorData.details)) {
+          const fieldErrors = errorData.details.map((d: { path?: string[]; message?: string }) => 
+            `${d.path?.join('.') || 'unknown'}: ${d.message || 'invalid'}`
+          ).join('\n');
+          throw new Error(`Validation failed:\n${fieldErrors}`);
+        }
+        throw new Error(errorData.error || 'Failed to create event');
       }
 
       router.push('/events');

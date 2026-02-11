@@ -30,7 +30,7 @@ export interface FootballMatch {
     name: string;
     shortName: string;
     tla: string;
-    crest: string;
+    crest: string | null;
     address?: string; // Contains city info like "Manchester M16 0RA"
   };
   awayTeam: {
@@ -38,7 +38,7 @@ export interface FootballMatch {
     name: string;
     shortName: string;
     tla: string;
-    crest: string;
+    crest: string | null;
     address?: string;
   };
   score: {

@@ -17,15 +17,21 @@ const soccerEventSchema = z.object({
   venueCountry: z.string().optional().default(''),
   homeTeam: z.string().min(1, 'Home team is required'),
   awayTeam: z.string().min(1, 'Away team is required'),
-  homeScore: z.number().min(0).default(0),
-  awayScore: z.number().min(0).default(0),
+  homeScore: z.coerce.number().min(0).default(0),
+  awayScore: z.coerce.number().min(0).default(0),
   competition: z.string().optional(),
   externalMatchId: z.union([z.string(), z.number()]).transform(v => v?.toString()).optional(),
   // Team logo data from API search
   homeTeamId: z.union([z.string(), z.number()]).transform(v => v?.toString()).optional(),
   awayTeamId: z.union([z.string(), z.number()]).transform(v => v?.toString()).optional(),
-  homeTeamCrest: z.string().url().optional().nullable(),
-  awayTeamCrest: z.string().url().optional().nullable(),
+  homeTeamCrest: z.string().optional().nullable().transform(v => {
+    if (!v || v === '') return null;
+    try { new URL(v); return v; } catch { return null; }
+  }),
+  awayTeamCrest: z.string().optional().nullable().transform(v => {
+    if (!v || v === '') return null;
+    try { new URL(v); return v; } catch { return null; }
+  }),
   notes: z.string().optional(),
   rating: z.number().min(1).max(5).optional(),
   companions: z.array(z.string()).default([]),
