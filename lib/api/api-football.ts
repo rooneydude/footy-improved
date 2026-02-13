@@ -213,6 +213,10 @@ const EXTENDED_COMPETITIONS: Record<string, number> = {
   'AFCON': 6,   // Africa Cup of Nations
   'AC': 16,     // Asian Cup
   
+  // Qualifiers
+  'ECQ': 960,   // Euro Championship - Qualification
+  'WCQ_EUR': 32, // World Cup - Qualification Europe
+  
   // Domestic Cups (Top 5 leagues)
   'FAC': 45,    // FA Cup (England)
   'EFL': 46,    // EFL Cup (England)
@@ -339,6 +343,8 @@ const CALENDAR_YEAR_COMPETITIONS = [
   'MLS', 'LMX',
   // International tournaments (played within a single calendar year)
   'WC', 'EC', 'CA', 'GC', 'AFCON', 'AC',
+  // Qualifiers (use the cycle year, e.g. season=2023 for Euro 2024 qualifiers)
+  'ECQ', 'WCQ_EUR',
   // FIFA club tournaments
   'CWC', 'USC',
 ];
@@ -568,6 +574,9 @@ export function getExtendedCompetitions(): Array<{ code: string; id: number; nam
     'GC': 'CONCACAF Gold Cup',
     'AFCON': 'Africa Cup of Nations',
     'AC': 'AFC Asian Cup',
+    // Qualifiers
+    'ECQ': 'Euro Qualification',
+    'WCQ_EUR': 'World Cup Qualification (Europe)',
     // Domestic Cups
     'FAC': 'FA Cup',
     'EFL': 'EFL Cup',

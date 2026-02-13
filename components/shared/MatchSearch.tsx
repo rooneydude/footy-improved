@@ -99,7 +99,7 @@ interface MatchSearchProps {
 // Competition type filter options for soccer
 type CompetitionFilter = 'club' | 'international' | 'all';
 
-const INTERNATIONAL_COMPS = ['WC', 'EC', 'CA', 'GC', 'AFCON', 'AC'];
+const INTERNATIONAL_COMPS = ['WC', 'EC', 'CA', 'GC', 'AFCON', 'AC', 'ECQ', 'WCQ_EUR'];
 const CLUB_COMPS = ['PL', 'PD', 'BL1', 'SA', 'FL1', 'CL', 'EL', 'ECL', 'FAC', 'EFL', 'CDR', 'DFB', 'CIF', 'CDF', 'MLS', 'LMX', 'CL_CONMEBOL', 'CS', 'CWC', 'USC', 'SPL', 'JPL', 'SL', 'RPL'];
 
 export function MatchSearch({ sportType, onMatchSelect, onPlayersLoaded }: MatchSearchProps) {
@@ -524,7 +524,7 @@ export function MatchSearch({ sportType, onMatchSelect, onPlayersLoaded }: Match
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   {competitionFilter === 'club' && 'Premier League, La Liga, Champions League, MLS, domestic cups...'}
-                  {competitionFilter === 'international' && 'World Cup, Euros, Copa America, Gold Cup, AFCON, Asian Cup'}
+                  {competitionFilter === 'international' && 'World Cup, Euros, Copa America, Gold Cup, AFCON, Asian Cup, Euro Qualifiers, WC Qualifiers'}
                   {competitionFilter === 'all' && 'All club and international competitions'}
                 </p>
               </div>
