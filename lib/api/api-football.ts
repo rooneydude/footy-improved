@@ -386,7 +386,7 @@ export async function searchExtendedMatches(
   
   // Use specified competitions or default to major leagues + extended
   // Priority: Top 5 European leagues, CL, EL, major cups, MLS
-  const defaultComps = ['PL', 'PD', 'BL1', 'SA', 'FL1', 'CL', 'EL', 'FAC', 'CDR', 'DFB', 'MLS'];
+  const defaultComps = ['PL', 'PD', 'BL1', 'SA', 'FL1', 'CL', 'EL', 'FAC', 'CDR', 'DFB', 'MLS', 'LC'];
   const competitionsToSearch = competitions || defaultComps;
   
   for (const compCode of competitionsToSearch) {
