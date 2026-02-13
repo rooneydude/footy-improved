@@ -100,7 +100,7 @@ interface MatchSearchProps {
 type CompetitionFilter = 'club' | 'international' | 'all';
 
 const INTERNATIONAL_COMPS = ['WC', 'EC', 'CA', 'GC', 'AFCON', 'AC', 'ECQ', 'WCQ_EUR'];
-const CLUB_COMPS = ['PL', 'PD', 'BL1', 'SA', 'FL1', 'CL', 'EL', 'ECL', 'FAC', 'EFL', 'CDR', 'DFB', 'CIF', 'CDF', 'MLS', 'LMX', 'CL_CONMEBOL', 'CS', 'CWC', 'USC', 'SPL', 'JPL', 'SL', 'RPL'];
+const CLUB_COMPS = ['PL', 'PD', 'BL1', 'SA', 'FL1', 'CL', 'EL', 'ECL', 'FAC', 'EFL', 'CDR', 'DFB', 'CIF', 'CDF', 'MLS', 'LMX', 'LC', 'CL_CONMEBOL', 'CS', 'CWC', 'USC', 'SPL', 'JPL', 'SL', 'RPL'];
 
 export function MatchSearch({ sportType, onMatchSelect, onPlayersLoaded }: MatchSearchProps) {
   const [query, setQuery] = useState('');

@@ -228,6 +228,7 @@ const EXTENDED_COMPETITIONS: Record<string, number> = {
   // Americas
   'MLS': 253,   // MLS (USA)
   'LMX': 262,   // Liga MX (Mexico)
+  'LC': 772,    // Leagues Cup (MLS vs Liga MX)
   'CL_CONMEBOL': 13, // Copa Libertadores
   'CS': 11,     // Copa Sudamericana
   
@@ -340,7 +341,7 @@ function getCompetitionCode(leagueId: number): string {
 // as opposed to European leagues that use cross-year seasons (season=2023 means Aug 2023 - May 2024)
 const CALENDAR_YEAR_COMPETITIONS = [
   // Americas leagues
-  'MLS', 'LMX',
+  'MLS', 'LMX', 'LC',
   // International tournaments (played within a single calendar year)
   'WC', 'EC', 'CA', 'GC', 'AFCON', 'AC',
   // Qualifiers (use the cycle year, e.g. season=2023 for Euro 2024 qualifiers)
@@ -577,6 +578,8 @@ export function getExtendedCompetitions(): Array<{ code: string; id: number; nam
     // Qualifiers
     'ECQ': 'Euro Qualification',
     'WCQ_EUR': 'World Cup Qualification (Europe)',
+    // Americas
+    'LC': 'Leagues Cup',
     // Domestic Cups
     'FAC': 'FA Cup',
     'EFL': 'EFL Cup',
